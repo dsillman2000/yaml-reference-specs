@@ -86,51 +86,51 @@ Feature: !reference tag basically functions
 
     Scenario: A file references two other files
         Given I create a file "subdir/item1.yaml" with content:
-        """
-        alpha: A
-        """
+            """
+            alpha: A
+            """
         And I create a file "subdir/item2.yaml" with content:
-        """
-        beta: B
-        """
+            """
+            beta: B
+            """
         And I provide input YAML:
-        """
-        root:
-        - !reference {path: subdir/item1.yaml}
-        - !reference {path: subdir/item2.yaml}
-        """
+            """
+            root:
+            - !reference {path: subdir/item1.yaml}
+            - !reference {path: subdir/item2.yaml}
+            """
         When I run yref-compile with any I/O mode
         Then the output shall be:
-        """
-        root:
-        - alpha: A
-        - beta: B
-        """
+            """
+            root:
+            - alpha: A
+            - beta: B
+            """
 
     Scenario: A file duplicates a reference with anchors and aliases
         Given I create a file "names/new.yaml" with content:
-        """
-        BasicName
-        ...
-        """
+            """
+            BasicName
+            ...
+            """
         And I provide input YAML:
-        """
-        myItem: &it
-          name: !reference {path: names/new.yaml}
-          isItem: true
-        values:
-        - {name: base, isItem: false}
-        - *it
-        """
+            """
+            myItem: &it
+              name: !reference {path: names/new.yaml}
+              isItem: true
+            values:
+            - {name: base, isItem: false}
+            - *it
+            """
         When I run yref-compile with any I/O mode
         Then the output shall be:
-        """
-        myItem:
-          name: BasicName
-          isItem: true
-        values:
-        - name: base
-          isItem: false
-        - name: BasicName
-          isItem: true
-        """
+            """
+            myItem:
+              name: BasicName
+              isItem: true
+            values:
+            - name: base
+              isItem: false
+            - name: BasicName
+              isItem: true
+            """
