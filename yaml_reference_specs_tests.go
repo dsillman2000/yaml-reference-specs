@@ -77,7 +77,7 @@ func runYamlReferenceCompile(ctx context.Context, ioMode CliIOMode) error {
 	if ioMode == StdinToStdout || ioMode == InputFileToStdout {
 		testCtx.outputs[ioMode] = strings.TrimSpace(string(output))
 	}
-	if ioMode == StdinToOutputFile || ioMode == InputFileToOutputFile {
+	if (ioMode == StdinToOutputFile || ioMode == InputFileToOutputFile) && testCtx.returnCodes[ioMode] == 0 {
 		// Read output file content
 		outputFilePath := filepath.Join(testCtx.tempDir, "output.yaml")
 		data, readErr := os.ReadFile(outputFilePath)
@@ -125,7 +125,7 @@ func theOutputShallBe(ctx context.Context, arg1 *godog.DocString) error {
 	for ioMode := StdinToStdout; ioMode <= InputFileToOutputFile; ioMode++ {
 		actual := strings.TrimSpace(testCtx.outputs[ioMode])
 		if actual != expected {
-			return fmt.Errorf("in IO mode %d, expected output to be %q, got %q", ioMode, expected, actual)
+			return fmt.Errorf("in IO mode %d, expected output to be:\n\n%s\n\nGot:\n\n%s\n", ioMode, expected, actual)
 		}
 	}
 	return nil
