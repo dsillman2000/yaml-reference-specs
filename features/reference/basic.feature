@@ -120,21 +120,21 @@ Feature: !reference tag basically functions
     And I provide input YAML:
       """
       myItem: &it
-        name: !reference {path: names/new.yaml}
         isItem: true
+        name: !reference {path: names/new.yaml}
       values:
-      - {name: base, isItem: false}
+      - {isItem: false, name: base}
       - *it
       """
     When I run yref-compile with any I/O mode
     Then the output shall be:
       """
       myItem:
+        isItem: true
         name: BasicName
-        isItem: true
       values:
-      - name: base
-        isItem: false
-      - name: BasicName
-        isItem: true
+      - isItem: false
+        name: base
+      - isItem: true
+        name: BasicName
       """

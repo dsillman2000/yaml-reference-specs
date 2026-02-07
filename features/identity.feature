@@ -35,3 +35,28 @@ Feature: yref-compile does not modify target files not containing any !reference
       - item2
       - value1
       """
+
+  Scenario: Keys are sorted by the CLI
+    Given I provide input YAML:
+      """
+      z: zee
+      y: why
+      x: ecks
+      items:
+      - group: a
+        alnum: true
+      - group: b
+        alnum: false
+      """
+    And I run yref-compile with any I/O mode
+    Then the output shall be:
+      """
+      items:
+      - alnum: true
+        group: a
+      - alnum: false
+        group: b
+      x: ecks
+      y: why
+      z: zee
+      """

@@ -50,9 +50,9 @@ Feature: !reference-all tag basically functions
       """
     And I create a file "configs/db.yml" with content:
       """
-      db: 
-        shards: 3
+      db:
         region: us-east-1
+        shards: 3
       """
     And I create a file "configs/client.yml" with content:
       """
@@ -68,8 +68,8 @@ Feature: !reference-all tag basically functions
           image: client-app:latest
           replicas: 5
       - db:
-          shards: 3
           region: us-east-1
+          shards: 3
       """
 
   Scenario: Compiling a file with !reference-all on an anchored node shall preserve the anchor.
@@ -77,7 +77,7 @@ Feature: !reference-all tag basically functions
       """
       items: &it
         !reference-all {glob: names/*.yml}
-      again: *it
+      itemsAgain: *it
       """
     And I create a file "names/1.yml" with content:
       """
@@ -95,7 +95,7 @@ Feature: !reference-all tag basically functions
       items:
       - One
       - Two
-      again:
+      itemsAgain:
       - One
       - Two
       """
