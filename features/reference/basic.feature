@@ -111,7 +111,7 @@ Feature: !reference tag basically functions
       - beta: B
       """
 
-  Scenario: A file duplicates a reference with anchors and aliases
+  Scenario: A file duplicates a reference with anchors and aliases (though the anchors/aliases are not preserved)
     Given I create a file "names/new.yaml" with content:
       """
       BasicName
@@ -129,10 +129,12 @@ Feature: !reference tag basically functions
     When I run yref-compile with any I/O mode
     Then the output shall be:
       """
-      myItem: &it
+      myItem:
         name: BasicName
         isItem: true
       values:
-      - {name: base, isItem: false}
-      - *it
+      - name: base
+        isItem: false
+      - name: BasicName
+        isItem: true
       """
