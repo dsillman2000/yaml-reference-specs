@@ -79,15 +79,15 @@ Feature: !reference-all tag basically functions
       {
         "configurations": [
           {
-            "db": {
-              "region": "us-east-1",
-              "shards": 3
-            }
-          },
-          {
             "client": {
               "image": "client-app:latest",
               "replicas": 5
+            }
+          },
+          {
+            "db": {
+              "region": "us-east-1",
+              "shards": 3
             }
           }
         ]

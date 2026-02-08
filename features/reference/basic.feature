@@ -16,7 +16,7 @@ Feature: !reference tag basically functions
     Then the output shall be:
       """
       {
-        "key": 13.3
+        "key1": 13.3
       }
       """
 
