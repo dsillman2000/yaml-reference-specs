@@ -5,7 +5,7 @@ Feature: !reference-all should sometimes throw errors.
       """
       items: !reference-all {glob: nonexistent-*.yml}
       """
-    And I run yref-compile with any I/O mode
+    And I run yref-compile
     Then the return code shall be 1
 
   Scenario: Compiling a file with !reference-all on a scalar node shall raise an error.
@@ -21,5 +21,5 @@ Feature: !reference-all should sometimes throw errors.
       """
       these: exist
       """
-    And I run yref-compile with any I/O mode
+    And I run yref-compile
     Then the return code shall be 1

@@ -13,7 +13,7 @@ Feature: Nested !reference tags
       """
       root: !reference {path: second.yaml}
       """
-    When I run yref-compile with any I/O mode
+    When I run yref-compile
     Then the output shall be:
       """
       {
@@ -43,7 +43,7 @@ Feature: Nested !reference tags
       """
       root: !reference {path: second-multi.yaml}
       """
-    When I run yref-compile with any I/O mode
+    When I run yref-compile
     Then the output shall be:
       """
       {
