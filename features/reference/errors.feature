@@ -5,7 +5,7 @@ Feature: !reference should sometimes throw errors.
       """
       item: !reference {path: nonexistent.yml}
       """
-    And I run yref-compile with any I/O mode
+    And I run yaml-reference-cli
     Then the return code shall be 1
 
   Scenario: Compiling a file with !reference on a scalar value shall raise an error.
@@ -18,5 +18,5 @@ Feature: !reference should sometimes throw errors.
       even: if
       this: exists
       """
-    And I run yref-compile with any I/O mode
+    And I run yaml-reference-cli
     Then the return code shall be 1

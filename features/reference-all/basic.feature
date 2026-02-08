@@ -12,7 +12,7 @@ Feature: !reference-all tag basically functions
       - listItem1
       - listItem2
       """
-    And I run yref-compile with any I/O mode
+    And I run yaml-reference-cli
     Then the output shall be:
       """
       {
@@ -41,7 +41,7 @@ Feature: !reference-all tag basically functions
       """
       key: value2
       """
-    And I run yref-compile with any I/O mode
+    And I run yaml-reference-cli
     Then the output shall be:
       """
       {
@@ -73,7 +73,7 @@ Feature: !reference-all tag basically functions
         image: client-app:latest
         replicas: 5
       """
-    And I run yref-compile with any I/O mode
+    And I run yaml-reference-cli
     Then the output shall be:
       """
       {
@@ -111,7 +111,7 @@ Feature: !reference-all tag basically functions
       Two
       ...
       """
-    And I run yref-compile with any I/O mode
+    And I run yaml-reference-cli
     Then the output shall be:
       """
       {

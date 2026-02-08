@@ -1,4 +1,4 @@
-Feature: yref-compile does not modify target files not containing any !reference tags
+Feature: yaml-reference-cli does not modify target files not containing any !reference tags
 
   Scenario: Compiling a file without !reference tags leaves it unchanged, but converts to JSON
     Given I provide input YAML:
@@ -8,7 +8,7 @@ Feature: yref-compile does not modify target files not containing any !reference
       - item1
       - item2
       """
-    And I run yref-compile with any I/O mode
+    And I run yaml-reference-cli
     Then the output shall be:
       """
       {
@@ -29,7 +29,7 @@ Feature: yref-compile does not modify target files not containing any !reference
       - item2
       - *anchor1
       """
-    And I run yref-compile with any I/O mode
+    And I run yaml-reference-cli
     Then the output shall be:
       """
       {
@@ -54,7 +54,7 @@ Feature: yref-compile does not modify target files not containing any !reference
       - group: b
         alnum: false
       """
-    And I run yref-compile with any I/O mode
+    And I run yaml-reference-cli
     Then the output shall be:
       """
       {

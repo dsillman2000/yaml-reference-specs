@@ -37,7 +37,7 @@ Feature: Nested !reference-all tags
       """
       apple: Rochelle
       """
-    When I run yref-compile with any I/O mode
+    When I run yaml-reference-cli
     Then the output shall be:
       """
       {

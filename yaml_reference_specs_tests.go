@@ -30,16 +30,18 @@ func runYamlReferenceCompile(ctx context.Context) error {
 
 	yamlReferenceCliExecutable := testCtx.yamlReferenceCliExecutable
 
-	// Execute yref-compile CLI with the provided arguments in the scenario temp dir
-	cmd := exec.Command(yamlReferenceCliExecutable)
+	// Provide path to YAML document to the command
+	inputPath := testCtx.tempDir + "/input.yaml"
+	args := []string{inputPath}
+
+	// Execute yaml-reference-cli CLI with the provided arguments in the scenario temp dir
+	cmd := exec.Command(yamlReferenceCliExecutable, args...)
 	if testCtx.tempDir != "" {
 		cmd.Dir = testCtx.tempDir
 	}
-	// Provide stdin YAML document to the command
-	cmd.Stdin = strings.NewReader(testCtx.yamlReferenceCliArgs.givenInput)
 	output, err := cmd.CombinedOutput()
 	if cmd.ProcessState == nil {
-		return fmt.Errorf("failed to start yref-compile command: %w", err)
+		return fmt.Errorf("failed to start yaml-reference-cli command: %w", err)
 	}
 	testCtx.returnCode = cmd.ProcessState.ExitCode()
 	// Capture output
@@ -53,6 +55,10 @@ func iProvideInputYaml(ctx context.Context, arg1 *godog.DocString) error {
 		return fmt.Errorf("test context not found")
 	}
 	testCtx.yamlReferenceCliArgs.givenInput = arg1.Content
+	inputPath := testCtx.tempDir + "/input.yaml"
+	if err := os.WriteFile(inputPath, []byte(arg1.Content), 0o644); err != nil {
+		return fmt.Errorf("failed to write input file: %w", err)
+	}
 	return nil
 }
 
@@ -86,7 +92,7 @@ func theOutputShallBe(ctx context.Context, arg1 *godog.DocString) error {
 	return nil
 }
 
-func iRunYamlReferenceCompileWithAnyIOMode(ctx context.Context) error {
+func iRunYamlReferenceCli(ctx context.Context) error {
 	testCtx := ctx.Value("testContext").(*testContext)
 	if testCtx == nil {
 		return fmt.Errorf("test context not found")
@@ -147,5 +153,5 @@ func InitializeScenario(ctx *godog.ScenarioContext) {
 	ctx.Step(`^I provide input YAML:$`, iProvideInputYaml)
 	ctx.Step(`^the output shall be:$`, theOutputShallBe)
 	ctx.Step(`^the return code shall be (\d+)$`, returnCodeShallBe)
-	ctx.Step(`^I run yref-compile with any I/O mode$`, iRunYamlReferenceCompileWithAnyIOMode)
+	ctx.Step(`^I run yaml-reference-cli$`, iRunYamlReferenceCli)
 }
