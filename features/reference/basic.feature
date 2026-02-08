@@ -15,7 +15,9 @@ Feature: !reference tag basically functions
     And I run yref-compile with any I/O mode
     Then the output shall be:
       """
-      key1: 13.3
+      {
+        "key1": 13.3
+      }
       """
 
   Scenario: Compiling a file with !reference tags replaces them with the referenced content
@@ -35,11 +37,15 @@ Feature: !reference tag basically functions
     And I run yref-compile with any I/O mode
     Then the output shall be:
       """
-      key1:
-        keyA: valueA
-        keyB:
-        - listItem1
-        - listItem2
+      {
+        "key1": {
+          "keyA": "valueA",
+          "keyB": [
+            "listItem1",
+            "listItem2"
+          ]
+        }
+      }
       """
 
   Scenario: Compiling a file with !reference tags replaces them with the referenced content
@@ -60,7 +66,9 @@ Feature: !reference tag basically functions
     And I run yref-compile with any I/O mode
     Then the output shall be:
       """
-      key1: some long string value that spans multiple lines in the file.
+      {
+        "key1": "some long string value that spans multiple lines in the file."
+      }
       """
 
   Scenario: Compiling a file with !reference tags replaces them with the referenced content
@@ -81,11 +89,15 @@ Feature: !reference tag basically functions
     And I run yref-compile with any I/O mode
     Then the output shall be:
       """
-      key1:
-        keyA: valueA
-        keyB:
-        - listItem1
-        - listItem2
+      {
+        "key1": {
+          "keyA": "valueA",
+          "keyB": [
+            "listItem1",
+            "listItem2"
+          ]
+        }
+      }
       """
 
   Scenario: A file references two other files
@@ -106,9 +118,16 @@ Feature: !reference tag basically functions
     When I run yref-compile with any I/O mode
     Then the output shall be:
       """
-      root:
-      - alpha: A
-      - beta: B
+      {
+        "root": [
+          {
+            "alpha": "A"
+          },
+          {
+            "beta": "B"
+          }
+        ]
+      }
       """
 
   Scenario: A file duplicates a reference with anchors and aliases (though the anchors/aliases are not preserved)
@@ -129,12 +148,20 @@ Feature: !reference tag basically functions
     When I run yref-compile with any I/O mode
     Then the output shall be:
       """
-      myItem:
-        isItem: true
-        name: BasicName
-      values:
-      - isItem: false
-        name: base
-      - isItem: true
-        name: BasicName
+      {
+        "myItem": {
+          "isItem": true,
+          "name": "BasicName"
+        },
+        "values": [
+          {
+            "isItem": false,
+            "name": "base"
+          },
+          {
+            "isItem": true,
+            "name": "BasicName"
+          }
+        ]
+      }
       """

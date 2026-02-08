@@ -16,9 +16,13 @@ Feature: Nested !reference tags
     When I run yref-compile with any I/O mode
     Then the output shall be:
       """
-      root:
-        value:
-          final: 42
+      {
+        "root": {
+          "value": {
+            "final": 42
+          }
+        }
+      }
       """
 
   Scenario: A file references two other files
@@ -42,9 +46,14 @@ Feature: Nested !reference tags
     When I run yref-compile with any I/O mode
     Then the output shall be:
       """
-      root:
-        partA:
-          alpha: A
-        partB:
-          beta: B
+      {
+        "root": {
+          "partA": {
+            "alpha": "A"
+          },
+          "partB": {
+            "beta": "B"
+          }
+        }
+      }
       """
