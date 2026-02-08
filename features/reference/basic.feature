@@ -12,7 +12,7 @@ Feature: !reference tag basically functions
       13.3
       ...
       """
-    And I run yref-compile
+    And I run yaml-reference-cli
     Then the output shall be:
       """
       {
@@ -34,7 +34,7 @@ Feature: !reference tag basically functions
       - listItem1
       - listItem2
       """
-    And I run yref-compile
+    And I run yaml-reference-cli
     Then the output shall be:
       """
       {
@@ -63,7 +63,7 @@ Feature: !reference tag basically functions
       in the file.
       ...
       """
-    And I run yref-compile
+    And I run yaml-reference-cli
     Then the output shall be:
       """
       {
@@ -86,7 +86,7 @@ Feature: !reference tag basically functions
       - listItem1
       - listItem2
       """
-    And I run yref-compile
+    And I run yaml-reference-cli
     Then the output shall be:
       """
       {
@@ -115,7 +115,7 @@ Feature: !reference tag basically functions
       - !reference {path: subdir/item1.yaml}
       - !reference {path: subdir/item2.yaml}
       """
-    When I run yref-compile
+    When I run yaml-reference-cli
     Then the output shall be:
       """
       {
@@ -145,7 +145,7 @@ Feature: !reference tag basically functions
       - {isItem: false, name: base}
       - *it
       """
-    When I run yref-compile
+    When I run yaml-reference-cli
     Then the output shall be:
       """
       {

@@ -34,14 +34,14 @@ func runYamlReferenceCompile(ctx context.Context) error {
 	inputPath := testCtx.tempDir + "/input.yaml"
 	args := []string{inputPath}
 
-	// Execute yref-compile CLI with the provided arguments in the scenario temp dir
+	// Execute yaml-reference-cli CLI with the provided arguments in the scenario temp dir
 	cmd := exec.Command(yamlReferenceCliExecutable, args...)
 	if testCtx.tempDir != "" {
 		cmd.Dir = testCtx.tempDir
 	}
 	output, err := cmd.CombinedOutput()
 	if cmd.ProcessState == nil {
-		return fmt.Errorf("failed to start yref-compile command: %w", err)
+		return fmt.Errorf("failed to start yaml-reference-cli command: %w", err)
 	}
 	testCtx.returnCode = cmd.ProcessState.ExitCode()
 	// Capture output
@@ -92,7 +92,7 @@ func theOutputShallBe(ctx context.Context, arg1 *godog.DocString) error {
 	return nil
 }
 
-func iRunYamlReferenceCompile(ctx context.Context) error {
+func iRunYamlReferenceCli(ctx context.Context) error {
 	testCtx := ctx.Value("testContext").(*testContext)
 	if testCtx == nil {
 		return fmt.Errorf("test context not found")
@@ -153,5 +153,5 @@ func InitializeScenario(ctx *godog.ScenarioContext) {
 	ctx.Step(`^I provide input YAML:$`, iProvideInputYaml)
 	ctx.Step(`^the output shall be:$`, theOutputShallBe)
 	ctx.Step(`^the return code shall be (\d+)$`, returnCodeShallBe)
-	ctx.Step(`^I run yref-compile$`, iRunYamlReferenceCompile)
+	ctx.Step(`^I run yaml-reference-cli$`, iRunYamlReferenceCli)
 }
