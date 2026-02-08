@@ -40,13 +40,34 @@ Feature: Nested !reference-all tags
     When I run yref-compile with any I/O mode
     Then the output shall be:
       """
-      froot:
-      - apples:
-        - apple: Cheryl
-        - apple: Debra
-        - apple: Rochelle
-      - oranges:
-        - orange: Matt
-        - orange: Mark
-        - orange: Philip
+      {
+        "froot": [
+          {
+            "apples": [
+              {
+                "apple": "Cheryl"
+              },
+              {
+                "apple": "Debra"
+              },
+              {
+                "apple": "Rochelle"
+              }
+            ]
+          },
+          {
+            "oranges": [
+              {
+                "orange": "Matt"
+              },
+              {
+                "orange": "Mark"
+              },
+              {
+                "orange": "Philip"
+              }
+            ]
+          }
+        ]
+      }
       """

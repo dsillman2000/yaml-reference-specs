@@ -15,11 +15,17 @@ Feature: !reference-all tag basically functions
     And I run yref-compile with any I/O mode
     Then the output shall be:
       """
-      allData:
-      - keyA: valueA
-        keyB:
-        - listItem1
-        - listItem2
+      {
+        "allData": [
+          {
+            "keyA": "valueA",
+            "keyB": [
+              "listItem1",
+              "listItem2"
+            ]
+          }
+        ]
+      }
       """
 
   Scenario: Compiling a file with !reference-all pointing to multiple files shall gather all referenced contents into an array.
@@ -38,9 +44,16 @@ Feature: !reference-all tag basically functions
     And I run yref-compile with any I/O mode
     Then the output shall be:
       """
-      allData:
-      - key: value1
-      - key: value2
+      {
+        "allData": [
+          {
+            "key": "value1"
+          },
+          {
+            "key": "value2"
+          }
+        ]
+      }
       """
 
   Scenario: Compiling a file with !reference-all pointing to multiple files in a subdirectory shall gather all referenced contents into an array.
@@ -63,13 +76,22 @@ Feature: !reference-all tag basically functions
     And I run yref-compile with any I/O mode
     Then the output shall be:
       """
-      configurations:
-      - client:
-          image: client-app:latest
-          replicas: 5
-      - db:
-          region: us-east-1
-          shards: 3
+      {
+        "configurations": [
+          {
+            "db": {
+              "region": "us-east-1",
+              "shards": 3
+            }
+          },
+          {
+            "client": {
+              "image": "client-app:latest",
+              "replicas": 5
+            }
+          }
+        ]
+      }
       """
 
   Scenario: Compiling a file with !reference-all on an anchored node shall preserve the anchor.
@@ -92,10 +114,14 @@ Feature: !reference-all tag basically functions
     And I run yref-compile with any I/O mode
     Then the output shall be:
       """
-      items:
-      - One
-      - Two
-      itemsAgain:
-      - One
-      - Two
+      {
+        "items": [
+          "One",
+          "Two"
+        ],
+        "itemsAgain": [
+          "One",
+          "Two"
+        ]
+      }
       """
