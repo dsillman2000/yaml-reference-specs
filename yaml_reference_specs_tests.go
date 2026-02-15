@@ -78,6 +78,22 @@ func iCreateFileWithContent(ctx context.Context, arg1 string, arg2 *godog.DocStr
 	return nil
 }
 
+func iCreateSymlink(ctx context.Context, arg1 string, arg2 string) error {
+	testCtx := ctx.Value("testContext").(*testContext)
+	if testCtx == nil {
+		return fmt.Errorf("test context not found")
+	}
+	fullSymlinkPath := filepath.Join(testCtx.tempDir, arg1)
+	if err := os.MkdirAll(filepath.Dir(fullSymlinkPath), 0o755); err != nil {
+		return fmt.Errorf("failed to create directories for %s: %w", arg1, err)
+	}
+	// Create symlink
+	if err := os.Symlink(arg2, fullSymlinkPath); err != nil {
+		return fmt.Errorf("failed to create symlink %s -> %s: %w", arg1, arg2, err)
+	}
+	return nil
+}
+
 func theOutputShallBe(ctx context.Context, arg1 *godog.DocString) error {
 	testCtx := ctx.Value("testContext").(*testContext)
 	if testCtx == nil {
@@ -150,6 +166,7 @@ func InitializeScenario(ctx *godog.ScenarioContext) {
 		return ctx, nil
 	})
 	ctx.Step(`^I create a file "([^"]*)" with content:$`, iCreateFileWithContent)
+	ctx.Step(`^I create a symlink "([^"]*)" pointing to "([^"]*)"$`, iCreateSymlink)
 	ctx.Step(`^I provide input YAML:$`, iProvideInputYaml)
 	ctx.Step(`^the output shall be:$`, theOutputShallBe)
 	ctx.Step(`^the return code shall be (\d+)$`, returnCodeShallBe)
