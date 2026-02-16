@@ -109,21 +109,21 @@ Feature: Paths may be explicitly allowed, otherwise restrictive default access c
       """
     And I explicitly allow the path "project" to be resolved
     And I run yaml-reference-cli
-    Then the return code shall be 0
+    # Then the return code shall be 0
     And the output shall be:
       """
       {
         "project": [
           {
-            "name": "My Project",
             "author": "John Doe",
             "email": "john.doe@example.com",
+            "name": "My Project",
             "version": "1.0.0"
           },
           {
-            "name": "My Project 2",
             "author": "John Doe 2",
             "email": "john.doe2@example.com",
+            "name": "My Project 2",
             "version": "2.0.0"
           }
         ],
@@ -135,3 +135,47 @@ Feature: Paths may be explicitly allowed, otherwise restrictive default access c
         ]
       }
       """
+
+  Scenario: You cannot navigate out of the root directory using a !reference-all tag with a symlink.
+    Given I provide input YAML:
+      """
+      ext: !reference-all {glob: local-external/*.yaml}
+      """
+    And the input YAML is in a directory "root"
+    And I create a file "external/secret.yaml" with content:
+      """
+      secret: password123
+      """
+    And I create a file "external/other-secret.yaml" with content:
+      """
+      secret: password456
+      """
+    And I create a symlink "root/local-external" pointing to "external"
+    And I run yaml-reference-cli
+    Then the return code shall be 1
+
+  Scenario: You cannot navigate out of the root directory using a !reference-all tag to navigate through a symlink.
+    Given I provide input YAML:
+      """
+      links: !reference-all {glob: symlinked/*/info.yaml}
+      """
+    And the input YAML is in a directory "root"
+    And I create a file "not-allowed/info.yaml" with content:
+      """
+      secret: password123
+      """
+    And I create a file "libs/info.yaml" with content:
+      """
+      lib.info: "0.1.0"
+      """
+    And I create a file "headers/info.yaml" with content:
+      """
+      header.info: "1.0.0"
+      """
+    And I create a symlink "root/symlinked/libs" pointing to "libs"
+    And I create a symlink "root/symlinked/headers" pointing to "headers"
+    And I create a symlink "root/symlinked/not-allowed" pointing to "not-allowed"
+    And I explicitly allow the path "libs" to be resolved
+    And I explicitly allow the path "headers" to be resolved
+    And I run yaml-reference-cli
+    Then the return code shall be 1

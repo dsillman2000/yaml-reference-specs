@@ -69,6 +69,20 @@ Feature: Paths may be explicitly allowed, otherwise restrictive default access c
     And I run yaml-reference-cli
     Then the return code shall be 1
 
+  Scenario: You cannot navigate out of the root directory from within a reference, even using a symlink.
+    Given I provide input YAML:
+      """
+      ext: !reference {path: local-external/secret.yaml}
+      """
+    And the input YAML is in a directory "root"
+    And I create a file "external/secret.yaml" with content:
+      """
+      secret: password123
+      """
+    And I create a symlink "root/local-external" pointing to "external"
+    And I run yaml-reference-cli
+    Then the return code shall be 1
+
   Scenario: You may explicitly allow paths outside of the root directory to be resolved from a reference.
     Given I provide input YAML:
       """
@@ -90,9 +104,9 @@ Feature: Paths may be explicitly allowed, otherwise restrictive default access c
       """
       {
         "project": {
-          "name": "My Project",
           "author": "John Doe",
           "email": "john.doe@example.com",
+          "name": "My Project",
           "version": "1.0.0"
         },
         "stack": [

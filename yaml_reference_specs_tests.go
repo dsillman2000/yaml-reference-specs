@@ -59,7 +59,12 @@ func runYamlReferenceCompile(ctx context.Context) error {
 	// If explicit paths are allowed, add them to the command arguments
 	if len(testCtx.yamlReferenceCliArgs.allowPaths) > 0 {
 		for _, path := range testCtx.yamlReferenceCliArgs.allowPaths {
-			args = append(args, "--allow", path)
+			// Resolve the path relative to the input directory
+			resolvedPath, err := filepath.Abs(filepath.Join(testCtx.tempDir, path))
+			if err != nil {
+				return fmt.Errorf("failed to resolve path %s: %w", path, err)
+			}
+			args = append(args, "--allow", resolvedPath)
 		}
 	}
 
