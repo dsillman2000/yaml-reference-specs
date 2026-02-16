@@ -3,8 +3,17 @@ yaml-reference-specs
 
 This repository is a Gherkin specification suite for the behavior of a modular YAML reference compilation CLI called `yaml-reference-cli`.
 
+Some of the projects which conform to this specification include:
+
+| Project | Compliance status | Link |
+| --- | --- | --- |
+| yaml-reference (Python) | ✅ | [Github](https://github.com/dsillman2000/yaml-reference) \| [PyPI](https://pypi.org/project/yaml-reference/) |
+| yaml-reference-ts (TypeScript) | ✅ | [Github](https://github.com/dsillman2000/yaml-reference-ts) \| [npm](https://www.npmjs.com/package/@dsillman2000/yaml-reference-ts) |
+
 Purpose
 -------
+> The CLI provides a language-agnostic framework for being able to assess the functionality of client libraries which implement the behavior of resolving YAML files which reference other YAML files (using `!reference` + `!reference-all` syntax).
+
 - Describe the expected behavior of `yaml-reference-cli` using human-readable feature files under `features/`.
 - Drive regression tests for the CLI implementation via Go tests that use the `godog` framework.
 
