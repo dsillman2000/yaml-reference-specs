@@ -14,6 +14,8 @@ import (
 type YamlReferenceCliArgs struct {
 	givenInput     string
 	expectedOutput string
+	inputDirectory string
+	allowPaths     []string
 }
 
 type testContext struct {
@@ -30,9 +32,41 @@ func runYamlReferenceCompile(ctx context.Context) error {
 
 	yamlReferenceCliExecutable := testCtx.yamlReferenceCliExecutable
 
+	// Create input file in the specified directory (or root if not specified)
+	inputDir := testCtx.tempDir
+	if testCtx.yamlReferenceCliArgs.inputDirectory != "" {
+		inputDir = filepath.Join(testCtx.tempDir, testCtx.yamlReferenceCliArgs.inputDirectory)
+		if err := os.MkdirAll(inputDir, 0o755); err != nil {
+			return fmt.Errorf("failed to create input directory %s: %w", testCtx.yamlReferenceCliArgs.inputDirectory, err)
+		}
+	}
+
+	// Write input YAML content to file
+	if testCtx.yamlReferenceCliArgs.givenInput != "" {
+		inputPath := filepath.Join(inputDir, "input.yaml")
+		if err := os.WriteFile(inputPath, []byte(testCtx.yamlReferenceCliArgs.givenInput), 0o644); err != nil {
+			return fmt.Errorf("failed to write input file: %w", err)
+		}
+	}
+
 	// Provide path to YAML document to the command
-	inputPath := testCtx.tempDir + "/input.yaml"
+	inputPath := "input.yaml"
+	if testCtx.yamlReferenceCliArgs.inputDirectory != "" {
+		inputPath = filepath.Join(testCtx.yamlReferenceCliArgs.inputDirectory, "input.yaml")
+	}
 	args := []string{inputPath}
+
+	// If explicit paths are allowed, add them to the command arguments
+	if len(testCtx.yamlReferenceCliArgs.allowPaths) > 0 {
+		for _, path := range testCtx.yamlReferenceCliArgs.allowPaths {
+			// Resolve the path relative to the input directory
+			resolvedPath, err := filepath.Abs(filepath.Join(testCtx.tempDir, path))
+			if err != nil {
+				return fmt.Errorf("failed to resolve path %s: %w", path, err)
+			}
+			args = append(args, "--allow", resolvedPath)
+		}
+	}
 
 	// Execute yaml-reference-cli CLI with the provided arguments in the scenario temp dir
 	cmd := exec.Command(yamlReferenceCliExecutable, args...)
@@ -55,10 +89,16 @@ func iProvideInputYaml(ctx context.Context, arg1 *godog.DocString) error {
 		return fmt.Errorf("test context not found")
 	}
 	testCtx.yamlReferenceCliArgs.givenInput = arg1.Content
-	inputPath := testCtx.tempDir + "/input.yaml"
-	if err := os.WriteFile(inputPath, []byte(arg1.Content), 0o644); err != nil {
-		return fmt.Errorf("failed to write input file: %w", err)
+	// Don't create the file here - wait until we know the directory
+	return nil
+}
+
+func iExplicitlyAllowPath(ctx context.Context, arg1 string) error {
+	testCtx := ctx.Value("testContext").(*testContext)
+	if testCtx == nil {
+		return fmt.Errorf("test context not found")
 	}
+	testCtx.yamlReferenceCliArgs.allowPaths = append(testCtx.yamlReferenceCliArgs.allowPaths, arg1)
 	return nil
 }
 
@@ -78,19 +118,28 @@ func iCreateFileWithContent(ctx context.Context, arg1 string, arg2 *godog.DocStr
 	return nil
 }
 
-func iCreateSymlink(ctx context.Context, arg1 string, arg2 string) error {
+func iCreateSymlink(ctx context.Context, symlinkPath, targetPath string) error {
 	testCtx := ctx.Value("testContext").(*testContext)
 	if testCtx == nil {
 		return fmt.Errorf("test context not found")
 	}
-	fullSymlinkPath := filepath.Join(testCtx.tempDir, arg1)
+	fullSymlinkPath := filepath.Join(testCtx.tempDir, symlinkPath)
 	if err := os.MkdirAll(filepath.Dir(fullSymlinkPath), 0o755); err != nil {
-		return fmt.Errorf("failed to create directories for %s: %w", arg1, err)
+		return fmt.Errorf("failed to create directories for %s: %w", symlinkPath, err)
 	}
 	// Create symlink
-	if err := os.Symlink(arg2, fullSymlinkPath); err != nil {
-		return fmt.Errorf("failed to create symlink %s -> %s: %w", arg1, arg2, err)
+	if err := os.Symlink(targetPath, fullSymlinkPath); err != nil {
+		return fmt.Errorf("failed to create symlink %s -> %s: %w", symlinkPath, targetPath, err)
 	}
+	return nil
+}
+
+func iProvideInputYamlInDirectory(ctx context.Context, directory string) error {
+	testCtx := ctx.Value("testContext").(*testContext)
+	if testCtx == nil {
+		return fmt.Errorf("test context not found")
+	}
+	testCtx.yamlReferenceCliArgs.inputDirectory = directory
 	return nil
 }
 
@@ -168,6 +217,8 @@ func InitializeScenario(ctx *godog.ScenarioContext) {
 	ctx.Step(`^I create a file "([^"]*)" with content:$`, iCreateFileWithContent)
 	ctx.Step(`^I create a symlink "([^"]*)" pointing to "([^"]*)"$`, iCreateSymlink)
 	ctx.Step(`^I provide input YAML:$`, iProvideInputYaml)
+	ctx.Step(`^the input YAML is in a directory "([^"]*)"$`, iProvideInputYamlInDirectory)
+	ctx.Step(`^I explicitly allow the path "([^"]*)" to be resolved$`, iExplicitlyAllowPath)
 	ctx.Step(`^the output shall be:$`, theOutputShallBe)
 	ctx.Step(`^the return code shall be (\d+)$`, returnCodeShallBe)
 	ctx.Step(`^I run yaml-reference-cli$`, iRunYamlReferenceCli)
