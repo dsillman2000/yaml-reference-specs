@@ -10,9 +10,17 @@ Some of the projects which conform to this specification include:
 | yaml-reference (Python) | ✅ | [Github](https://github.com/dsillman2000/yaml-reference) \| [PyPI](https://pypi.org/project/yaml-reference/) |
 | yaml-reference-ts (TypeScript) | ✅ | [Github](https://github.com/dsillman2000/yaml-reference-ts) \| [npm](https://www.npmjs.com/package/@dsillman2000/yaml-reference-ts) |
 
+Tags supported include:
+
+- **`!reference`**: "Import" another YAML document from another file into the current node.
+  - `path`: Relative path to the YAML file to "import."
+- **`!reference-all`**: "Import" all YAML documents using a specific glob pattern into a sequence node.
+  - `glob`: Relative glob pattern matching YAML files to "import."
+- **`!flatten`**: "Flatten" a nested sequence of sequences into a one-dimensional sequence.
+
 Purpose
 -------
-> The CLI provides a language-agnostic framework for being able to assess the functionality of client libraries which implement the behavior of resolving YAML files which reference other YAML files (using `!reference` + `!reference-all` syntax).
+> The CLI provides a language-agnostic framework for being able to assess the functionality of client libraries which implement the behavior of resolving YAML files which reference other YAML files (using `!reference`, `!reference-all` and `!flatten` syntax).
 
 - Describe the expected behavior of `yaml-reference-cli` using human-readable feature files under `features/`.
 - Drive regression tests for the CLI implementation via Go tests that use the `godog` framework.
