@@ -17,6 +17,8 @@ Purpose
 - Describe the expected behavior of `yaml-reference-cli` using human-readable feature files under `features/`.
 - Drive regression tests for the CLI implementation via Go tests that use the `godog` framework.
 
+The specification has a basic [README](./features/README.md) describing the responsibilities of YAML reference resolution.
+
 Repository layout
 -----------------
 - `features/` — Gherkin feature files exercising scenarios (input modes, file references, nested references, etc.).
