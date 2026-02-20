@@ -117,3 +117,25 @@ Feature: Paths may be explicitly allowed, otherwise restrictive default access c
         ]
       }
       """
+
+  Scenario: You may not access a file that belongs to a different folder outside of allowed paths with the same prefix.
+    Given I provide input YAML:
+      """
+      dataset: !reference {path: ../example/data01.yaml}
+      options:
+        overwrite: true
+      hacks: !reference {path: ../examplesecrets/my-super-secret-file.yaml}
+      """
+    And the input YAML is in a directory "application"
+    And I create a file "example/data01.yaml" with content:
+      """
+      unit: "celsius"
+      measurements: [24.0, 23.5, 24.5]
+      """
+    And I create a file "examplesecrets/my-super-secret-file.yaml" with content:
+      """
+      password: correct-horse-battery-staple
+      """
+    And I explicitly allow the path "example" to be resolved
+    And I run yaml-reference-cli
+    Then the return code shall be 1
