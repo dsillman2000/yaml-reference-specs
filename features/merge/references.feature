@@ -52,7 +52,7 @@ Feature: !merge tag shall support merging objects from !reference and !reference
       }
       """
 
-  Scenario: Merge a !reference-all result directly — !merge internally flattens the sequence of objects.
+  Scenario: Merge a !reference-all result directly - !merge internally flattens the sequence of objects.
     Given I create a file "overrides/a.yaml" with content:
       """
       a_key: a_value

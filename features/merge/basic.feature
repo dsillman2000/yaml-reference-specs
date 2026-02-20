@@ -107,7 +107,7 @@ Feature: !merge tag merges a sequence of objects using last-write-wins semantics
       }
       """
 
-  Scenario: Merge is shallow — nested objects are replaced entirely, not deep-merged.
+  Scenario: Merge is shallow - nested objects are replaced entirely, not deep-merged.
     Given I provide input YAML:
       """
       result: !merge
