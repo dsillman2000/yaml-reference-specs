@@ -73,3 +73,63 @@ Feature: !flatten tag flattens basic YAML sequence-of-sequences.
         ]
       }
       """
+
+  Scenario: Flatten only applies to the tagged node — nested sequences elsewhere in the document are preserved.
+    Given I provide input YAML:
+      """
+      flat: !flatten
+        - - 1
+          - 2
+        - - 3
+          - 4
+      nested:
+        - a
+        - b
+        - - c
+          - d
+      mixed:
+        items: !flatten
+          - - x
+            - y
+        groups:
+          - - alpha
+            - beta
+          - - gamma
+            - delta
+      """
+    And I run yaml-reference-cli
+    Then the output shall be:
+      """
+      {
+        "flat": [
+          1,
+          2,
+          3,
+          4
+        ],
+        "mixed": {
+          "groups": [
+            [
+              "alpha",
+              "beta"
+            ],
+            [
+              "gamma",
+              "delta"
+            ]
+          ],
+          "items": [
+            "x",
+            "y"
+          ]
+        },
+        "nested": [
+          "a",
+          "b",
+          [
+            "c",
+            "d"
+          ]
+        ]
+      }
+      """
