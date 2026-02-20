@@ -118,7 +118,7 @@ Feature: Paths may be explicitly allowed, otherwise restrictive default access c
       }
       """
 
-  Scenario: You may not access a file that belongs to a different folder outside of allowed paths with the same prefix.
+  Scenario: You may not access files in a sibling directory that shares the allowed path prefix.
     Given I provide input YAML:
       """
       dataset: !reference {path: ../example/data01.yaml}
