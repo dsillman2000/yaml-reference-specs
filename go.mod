@@ -1,4 +1,4 @@
-module github.com/dsillman2000/yaml-reference-specs/v2
+module github.com/dsillman2000/yaml-reference-specs
 
 go 1.25.6
 
