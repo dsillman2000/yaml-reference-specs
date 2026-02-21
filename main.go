@@ -7,6 +7,7 @@ import (
 
 	"github.com/cucumber/godog"
 	"github.com/cucumber/godog/colors"
+	"github.com/dsillman2000/yaml-reference-specs/yaml_reference_specs"
 )
 
 func main() {
@@ -40,7 +41,7 @@ func main() {
 	// Run the test suite
 	status := godog.TestSuite{
 		Name:                "yaml-reference CLI Test Suite",
-		ScenarioInitializer: InitializeScenario,
+		ScenarioInitializer: yaml_reference_specs.InitializeScenario,
 		Options:             &opts,
 	}.Run()
 
