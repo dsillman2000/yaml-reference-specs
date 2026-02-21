@@ -30,32 +30,31 @@ The specification has a basic [README](./features/README.md) describing the resp
 Repository layout
 -----------------
 - `features/` — Gherkin feature files exercising scenarios (input modes, file references, nested references, etc.).
-- `*.go` and `*_test.go` — test step implementations and Godog test harness.
+- `main.go` - CLI entrypoint that runs the `godog` test suite against a specified `yaml-reference-cli` implementation supplied with the `YAML_REFERENCE_CLI_EXECUTABLE` environment variable.
 
 Running the tests
 -----------------
 1. Build or make available the `yaml-reference-cli` CLI binary you want to verify.
 2. Set the environment variable `YAML_REFERENCE_CLI_EXECUTABLE` to the absolute path of that binary.
 
-Quick run (from repository root):
+If you have this project cloned on your machine, you can run the tests from this project directory with:
 
 ```bash
 export YAML_REFERENCE_CLI_EXECUTABLE=/absolute/path/to/yaml-reference-cli
-go test
+go run .
 ```
 
-Alternatively, if you prefer to run features via the `godog` runner install it and run:
+Alternatively, you can run the test suite by installing it directly with `go install` and then running the `yaml-reference-specs` binary:
 
 ```bash
-go install github.com/cucumber/godog/cmd/godog@latest
+go install github.com/dsillman2000/yaml-reference-specs@latest
 export YAML_REFERENCE_CLI_EXECUTABLE=/absolute/path/to/yaml-reference-cli
-godog
+yaml-reference-specs
 ```
 
 Notes
 -----
 - Each scenario runs in an isolated temporary directory; file-creation steps place files in that temp directory so tests do not modify your working tree.
-- Step implementations live in `yaml_reference_specs_tests.go` and include helpers for creating files, asserting file contents, providing stdin, and running the CLI.
 
 Contributing
 ------------
