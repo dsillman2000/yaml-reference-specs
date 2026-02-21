@@ -280,13 +280,14 @@ func main() {
 	format := flag.String("format", "pretty", "Format of output (pretty, junit, etc.)")
 	flag.Parse()
 
-	var featuresDir string
-	if featuresDir, err := extractFeaturesToTemp(); err != nil {
+	var featuresDir, err = extractFeaturesToTemp()
+	if err != nil || featuresDir == "" {
 		fmt.Fprintf(os.Stderr, "Error: Failed to extract features: %v\n", err)
 		os.Exit(1)
 	} else {
 		defer os.RemoveAll(featuresDir)
 	}
+	fmt.Fprintf(os.Stdout, "Features dir = %v\n", featuresDir)
 
 	// Validate CLI executable
 	if cliExecutable == "" {
@@ -300,11 +301,13 @@ func main() {
 	}
 
 	// Configure godog options
+	var paths []string = []string{filepath.Join(featuresDir, "features")}
 	var opts = godog.Options{
 		Output: colors.Colored(os.Stdout),
 		Format: *format,
-		Paths:  []string{filepath.Join(featuresDir, "features")},
+		Paths:  paths,
 	}
+	fmt.Printf("Using CLI executable: %s\nWith paths: %v\n", cliExecutable, paths)
 
 	// Run the test suite
 	status := godog.TestSuite{
