@@ -9,7 +9,7 @@ jobs:
     get-version:
         runs-on: ubuntu-latest
         outputs:
-            version: ${{ steps.gitversion.outputs.semVer }}
+            version: 0.${{ steps.gitversion.outputs.major }}.${{ steps.gitversion.outputs.minor }}-${{ steps.gitversion.outputs.patch }}
         steps:
             - name: Checkout
               uses: actions/checkout@v4
@@ -31,7 +31,9 @@ jobs:
               uses: gittools/actions/gitversion/execute@v0.11.0
 
             - name: Output version
-              run: 'echo "GitVersion returned: ${{ steps.gitversion.outputs.semVer }}"'
+              run: |
+                  echo "GitVersion returned: ${{ steps.gitversion.outputs.semVer }}"
+                  echo "version = 0.${{ steps.gitversion.outputs.major }}.${{ steps.gitversion.outputs.minor }}-${{ steps.gitversion.outputs.patch }}"
 
     release:
         runs-on: ubuntu-latest
