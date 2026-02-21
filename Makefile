@@ -2,4 +2,4 @@ install:
 	go mod tidy
 
 test-echo:
-	YAML_REFERENCE_CLI_EXECUTABLE=echo go test
+	YAML_REFERENCE_CLI_EXECUTABLE=echo go run .
