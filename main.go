@@ -2,8 +2,11 @@ package main
 
 import (
 	"context"
+	"embed"
 	"flag"
 	"fmt"
+	"io"
+	"io/fs"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -226,6 +229,47 @@ func InitializeScenario(ctx *godog.ScenarioContext) {
 	ctx.Step(`^I run yaml-reference-cli$`, iRunYamlReferenceCli)
 }
 
+//go:embed features/* features/*/*
+var embeddedFeatures embed.FS
+
+func extractFeaturesToTemp() (string, error) {
+	tmpDir, err := os.MkdirTemp("", "yaml-reference-specs-features-")
+	if err != nil {
+		return "", err
+	}
+	err = fs.WalkDir(embeddedFeatures, ".", func(p string, d fs.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		if d.IsDir() {
+			return nil
+		}
+		in, err := embeddedFeatures.Open(p)
+		if err != nil {
+			return err
+		}
+		defer in.Close()
+
+		outPath := filepath.Join(tmpDir, p)
+		if err := os.MkdirAll(filepath.Dir(outPath), 0o755); err != nil {
+			return err
+		}
+		out, err := os.Create(outPath)
+		if err != nil {
+			return err
+		}
+		defer out.Close()
+		_, err = io.Copy(out, in)
+		return err
+	})
+	if err != nil {
+		os.RemoveAll(tmpDir)
+		return "", err
+	}
+	fmt.Printf("tmpDir: %s\n", tmpDir)
+	return tmpDir, nil
+}
+
 func main() {
 	var cliExecutable string
 	if val, exists := os.LookupEnv("YAML_REFERENCE_CLI_EXECUTABLE"); exists {
@@ -235,6 +279,14 @@ func main() {
 	// Parse command line flags
 	format := flag.String("format", "pretty", "Format of output (pretty, junit, etc.)")
 	flag.Parse()
+
+	var featuresDir string
+	if featuresDir, err := extractFeaturesToTemp(); err != nil {
+		fmt.Fprintf(os.Stderr, "Error: Failed to extract features: %v\n", err)
+		os.Exit(1)
+	} else {
+		defer os.RemoveAll(featuresDir)
+	}
 
 	// Validate CLI executable
 	if cliExecutable == "" {
@@ -251,7 +303,7 @@ func main() {
 	var opts = godog.Options{
 		Output: colors.Colored(os.Stdout),
 		Format: *format,
-		Paths:  []string{"features"},
+		Paths:  []string{filepath.Join(featuresDir, "features")},
 	}
 
 	// Run the test suite
