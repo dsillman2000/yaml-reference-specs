@@ -60,3 +60,10 @@ yaml-reference-specs
 
 - Add feature files under `features/` to describe new behaviors.
 - Add corresponding step implementations or extend existing steps in the test file when needed.
+
+## Acknowledgments
+
+Author(s):
+
+- David Sillman <dsillman2000@gmail.com>
+- Ryan Johnson <github@ryodine.com>
