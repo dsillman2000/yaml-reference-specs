@@ -184,8 +184,8 @@ Feature: !reference tag basically functions
       .saleModel: &sale
         path: "api/models/crm/txn/sale.yaml"
       items:
-      - !reference *sale
-      - !reference *account
+      - !reference {<<: *sale}
+      - !reference {<<: *account}
       """
     When I run yaml-reference-cli
     Then the output shall be:

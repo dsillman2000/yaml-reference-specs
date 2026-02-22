@@ -141,7 +141,7 @@ Feature: !reference-all tag basically functions
       """
       .models: &models
         glob: "api/models/**/*.yaml"
-      items: !reference-all *models
+      items: !reference-all {<<: *models}
       """
     When I run yaml-reference-cli
     Then the output shall be:
