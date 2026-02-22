@@ -139,17 +139,14 @@ Feature: !reference-all tag basically functions
       """
     And I provide input YAML:
       """
-      .models: &models
-        glob: "api/models/**/*.yaml"
-      items: !reference-all {<<: *models}
+      references:
+        - &models 'api/models/**/*.yaml'
+      items: !reference-all {glob: *models}
       """
     When I run yaml-reference-cli
     Then the output shall be:
       """
       {
-        ".models": {
-          "glob": "api/models/**/*.yaml"
-        },
         "items": [
           {
             "name": "Account",
@@ -159,6 +156,9 @@ Feature: !reference-all tag basically functions
             "name": "Sale",
             "type": "object"
           }
+        ],
+        "references": [
+          "api/models/**/*.yaml"
         ]
       }
       """

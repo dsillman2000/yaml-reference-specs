@@ -179,24 +179,19 @@ Feature: !reference tag basically functions
       """
     And I provide input YAML:
       """
-      .accountModel: &account
-        path: "api/models/crm/account.yaml"
-      .saleModel: &sale
-        path: "api/models/crm/txn/sale.yaml"
+      references:
+      - &account
+        api/models/crm/account.yaml
+      - &sale
+        api/models/crm/txn/sale.yaml
       items:
-      - !reference {<<: *sale}
-      - !reference {<<: *account}
+      - !reference {path: *sale}
+      - !reference {path: *account}
       """
     When I run yaml-reference-cli
     Then the output shall be:
       """
       {
-        ".accountModel": {
-          "path": "api/models/crm/account.yaml"
-        },
-        ".saleModel": {
-          "path": "api/models/crm/txn/sale.yaml"
-        },
         "items": [
           {
             "name": "Sale",
@@ -206,6 +201,10 @@ Feature: !reference tag basically functions
             "name": "Account",
             "type": "object"
           }
+        ],
+        "references": [
+          "api/models/crm/account.yaml",
+          "api/models/crm/txn/sale.yaml"
         ]
       }
       """
