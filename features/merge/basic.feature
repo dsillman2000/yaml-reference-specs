@@ -193,7 +193,7 @@ Feature: !merge tag merges a sequence of objects using last-write-wins semantics
   Scenario: An anchored !merge node can be aliased to duplicate its merged result.
     Given I provide input YAML:
       """
-      merged: !merge &m
+      merged: &m !merge
         - { a: 1, b: 2 }
         - { b: 3, c: 4 }
       data:

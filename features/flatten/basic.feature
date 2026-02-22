@@ -137,7 +137,7 @@ Feature: !flatten tag flattens basic YAML sequence-of-sequences.
   Scenario: An anchored !flatten node can be aliased to duplicate its flattened result.
     Given I provide input YAML:
       """
-      my-list: !flatten &l [[1, 2], [three]]
+      my-list: &l !flatten [[1, 2], [three]]
       data:
         contains: *l
       """
