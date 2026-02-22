@@ -133,3 +133,68 @@ Feature: !flatten tag flattens basic YAML sequence-of-sequences.
         ]
       }
       """
+
+  Scenario: An anchored !flatten node can be aliased to duplicate its flattened result.
+    Given I provide input YAML:
+      """
+      my-list: !flatten &l [[1, 2], [three]]
+      data:
+        contains: *l
+      """
+    And I run yaml-reference-cli
+    Then the output shall be:
+      """
+      {
+        "data": {
+          "contains": [
+            1,
+            2,
+            "three"
+          ]
+        },
+        "my-list": [
+          1,
+          2,
+          "three"
+        ]
+      }
+      """
+
+  Scenario: Aliases can be used as arguments within a !flatten node.
+    Given I provide input YAML:
+      """
+      d: &d [1, 2, 3]
+      e: &e [[4], [5], [6]]
+      data: !flatten [[[0]], *d, *e]
+      """
+    And I run yaml-reference-cli
+    Then the output shall be:
+      """
+      {
+        "d": [
+          1,
+          2,
+          3
+        ],
+        "data": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6
+        ],
+        "e": [
+          [
+            4
+          ],
+          [
+            5
+          ],
+          [
+            6
+          ]
+        ]
+      }
+      """
