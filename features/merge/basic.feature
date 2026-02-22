@@ -189,3 +189,64 @@ Feature: !merge tag merges a sequence of objects using last-write-wins semantics
         }
       }
       """
+
+  Scenario: An anchored !merge node can be aliased to duplicate its merged result.
+    Given I provide input YAML:
+      """
+      merged: !merge &m
+        - { a: 1, b: 2 }
+        - { b: 3, c: 4 }
+      data:
+        copy: *m
+      """
+    And I run yaml-reference-cli
+    Then the output shall be:
+      """
+      {
+        "data": {
+          "copy": {
+            "a": 1,
+            "b": 3,
+            "c": 4
+          }
+        },
+        "merged": {
+          "a": 1,
+          "b": 3,
+          "c": 4
+        }
+      }
+      """
+
+  Scenario: Aliases can be used as arguments within a !merge node.
+    Given I provide input YAML:
+      """
+      defaults: &defaults
+        host: localhost
+        port: 3000
+      overrides: &overrides
+        port: 8080
+        debug: true
+      result: !merge
+        - *defaults
+        - *overrides
+      """
+    And I run yaml-reference-cli
+    Then the output shall be:
+      """
+      {
+        "defaults": {
+          "host": "localhost",
+          "port": 3000
+        },
+        "overrides": {
+          "debug": true,
+          "port": 8080
+        },
+        "result": {
+          "debug": true,
+          "host": "localhost",
+          "port": 8080
+        }
+      }
+      """
