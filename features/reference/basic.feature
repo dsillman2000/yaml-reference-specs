@@ -165,3 +165,46 @@ Feature: !reference tag basically functions
         ]
       }
       """
+
+  Scenario: Anchored mapping nodes can be aliased as arguments to !reference tags.
+    Given I create a file "api/models/crm/account.yaml" with content:
+      """
+      name: Account
+      type: object
+      """
+    And I create a file "api/models/crm/txn/sale.yaml" with content:
+      """
+      name: Sale
+      type: object
+      """
+    And I provide input YAML:
+      """
+      references:
+      - &account
+        api/models/crm/account.yaml
+      - &sale
+        api/models/crm/txn/sale.yaml
+      items:
+      - !reference {path: *sale}
+      - !reference {path: *account}
+      """
+    When I run yaml-reference-cli
+    Then the output shall be:
+      """
+      {
+        "items": [
+          {
+            "name": "Sale",
+            "type": "object"
+          },
+          {
+            "name": "Account",
+            "type": "object"
+          }
+        ],
+        "references": [
+          "api/models/crm/account.yaml",
+          "api/models/crm/txn/sale.yaml"
+        ]
+      }
+      """

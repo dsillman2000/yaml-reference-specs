@@ -125,3 +125,40 @@ Feature: !reference-all tag basically functions
         ]
       }
       """
+
+  Scenario: An anchored mapping with a glob pattern can be aliased as an argument to a !reference-all tag.
+    Given I create a file "api/models/crm/account.yaml" with content:
+      """
+      name: Account
+      type: object
+      """
+    And I create a file "api/models/crm/txn/sale.yaml" with content:
+      """
+      name: Sale
+      type: object
+      """
+    And I provide input YAML:
+      """
+      references:
+        - &models 'api/models/**/*.yaml'
+      items: !reference-all {glob: *models}
+      """
+    When I run yaml-reference-cli
+    Then the output shall be:
+      """
+      {
+        "items": [
+          {
+            "name": "Account",
+            "type": "object"
+          },
+          {
+            "name": "Sale",
+            "type": "object"
+          }
+        ],
+        "references": [
+          "api/models/**/*.yaml"
+        ]
+      }
+      """
