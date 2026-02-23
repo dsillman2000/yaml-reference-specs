@@ -121,6 +121,7 @@ Feature: !reference-all tag supports the "anchor" argument
       """
       name: &name David
       age: &age 25
+      _nonexistent: &nonexistent "my value"
       """
     And I create a file "child-2.yaml" with content:
       """
