@@ -79,6 +79,30 @@ Feature: !reference tag supports the "anchor" argument
       }
       """
 
+  Scenario: Using anchor argument extracts a value whose anchor is itself a !merge result
+    Given I create a file "template.yaml" with content:
+      """
+      base: &base_config
+        project: Demo
+      config: &config !merge
+        - *base_config
+        - environment: production
+      """
+    And I provide input YAML:
+      """
+      template: !reference {path: template.yaml, anchor: config}
+      """
+    When I run yaml-reference-cli
+    Then the output shall be:
+      """
+      {
+        "template": {
+          "environment": "production",
+          "project": "Demo"
+        }
+      }
+      """
+
   Scenario: Providing a non-existent anchor to !reference shall raise an error
     Given I create a file "child.yaml" with content:
       """
