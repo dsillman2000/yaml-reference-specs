@@ -115,3 +115,116 @@ Feature: !reference tag supports the "anchor" argument
       """
     When I run yaml-reference-cli
     Then the return code shall be 1
+
+  Scenario: Using anchor argument extracts a value containing aliases to merge-produced anchors
+    Given I create a file "a.yaml" with content:
+      """
+      .dat:
+        c: &c 100
+
+      a: !merge
+        - foo: &fooVal !merge
+          - {a: 10}
+          - {b: *c}
+
+      b: &val
+        fooFromA: *fooVal
+      """
+    And I provide input YAML:
+      """
+      value:
+        data: !reference
+          path: a.yaml
+          anchor: val
+      """
+    When I run yaml-reference-cli
+    Then the output shall be:
+      """
+      {
+        "value": {
+          "data": {
+            "fooFromA": {
+              "a": 10,
+              "b": 100
+            }
+          }
+        }
+      }
+      """
+
+  Scenario: Anchored scalars of null, boolean, and empty string types are extracted faithfully
+    Given I create a file "scalars.yaml" with content:
+      """
+      nothing: &nullVal null
+      flag: &boolVal true
+      blank: &emptyStr ""
+      """
+    And I provide input YAML:
+      """
+      a: !reference {path: scalars.yaml, anchor: nullVal}
+      b: !reference {path: scalars.yaml, anchor: boolVal}
+      c: !reference {path: scalars.yaml, anchor: emptyStr}
+      """
+    When I run yaml-reference-cli
+    Then the output shall be:
+      """
+      {
+        "a": null,
+        "b": true,
+        "c": ""
+      }
+      """
+
+  Scenario: Anchored empty containers and populated sequences are extracted correctly
+    Given I create a file "containers.yaml" with content:
+      """
+      empty_map: &eMap {}
+      empty_seq: &eSeq []
+      items: &list [1, 2, 3]
+      """
+    And I provide input YAML:
+      """
+      a: !reference {path: containers.yaml, anchor: eMap}
+      b: !reference {path: containers.yaml, anchor: eSeq}
+      c: !reference {path: containers.yaml, anchor: list}
+      """
+    When I run yaml-reference-cli
+    Then the output shall be:
+      """
+      {
+        "a": {},
+        "b": [],
+        "c": [1, 2, 3]
+      }
+      """
+
+  Scenario: Root-level anchor and deeply nested anchor are both discoverable
+    Given I create a file "depth.yaml" with content:
+      """
+      &root
+      level1:
+        level2:
+          level3:
+            secret: &deep 42
+      """
+    And I provide input YAML:
+      """
+      whole: !reference {path: depth.yaml, anchor: root}
+      deep: !reference {path: depth.yaml, anchor: deep}
+      """
+    When I run yaml-reference-cli
+    Then the output shall be:
+      """
+      {
+        "whole": {
+          "level1": {
+            "level2": {
+              "level3": {
+                "secret": 42
+              }
+            }
+          }
+        },
+        "deep": 42
+      }
+      """

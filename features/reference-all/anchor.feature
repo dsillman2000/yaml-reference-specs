@@ -134,3 +134,107 @@ Feature: !reference-all tag supports the "anchor" argument
       """
     When I run yaml-reference-cli
     Then the return code shall be 1
+
+  Scenario: Anchored scalars of null, boolean, and empty string types are extracted faithfully
+    Given I create a file "children/scalars.yaml" with content:
+      """
+      nothing: &nullVal null
+      flag: &boolVal true
+      blank: &emptyStr ""
+      """
+    And I provide input YAML:
+      """
+      a: !reference-all {pattern: "children/scalars.yaml", anchor: nullVal}
+      b: !reference-all {pattern: "children/scalars.yaml", anchor: boolVal}
+      c: !reference-all {pattern: "children/scalars.yaml", anchor: emptyStr}
+      """
+    When I run yaml-reference-cli
+    Then the output shall be:
+      """
+      {
+        "a": [null],
+        "b": [true],
+        "c": [""]
+      }
+      """
+
+  Scenario: Anchored empty containers and populated sequences are extracted correctly
+    Given I create a file "children/containers.yaml" with content:
+      """
+      empty_map: &eMap {}
+      empty_seq: &eSeq []
+      items: &list [1, 2, 3]
+      """
+    And I provide input YAML:
+      """
+      a: !reference-all {pattern: "children/containers.yaml", anchor: eMap}
+      b: !reference-all {pattern: "children/containers.yaml", anchor: eSeq}
+      c: !reference-all {pattern: "children/containers.yaml", anchor: list}
+      """
+    When I run yaml-reference-cli
+    Then the output shall be:
+      """
+      {
+        "a": [{}],
+        "b": [[]],
+        "c": [[1, 2, 3]]
+      }
+      """
+
+  Scenario: Root-level anchor and deeply nested anchor are both discoverable
+    Given I create a file "children/depth.yaml" with content:
+      """
+      &root
+      level1:
+        level2:
+          level3:
+            secret: &deep 42
+      """
+    And I provide input YAML:
+      """
+      whole: !reference-all {pattern: "children/depth.yaml", anchor: root}
+      deep: !reference-all {pattern: "children/depth.yaml", anchor: deep}
+      """
+    When I run yaml-reference-cli
+    Then the output shall be:
+      """
+      {
+        "whole": [
+          {
+            "level1": {
+              "level2": {
+                "level3": {
+                  "secret": 42
+                }
+              }
+            }
+          }
+        ],
+        "deep": [42]
+      }
+      """
+
+  Scenario: Same anchor name across multiple matched files collects all values
+    Given I create a file "children/alice.yaml" with content:
+      """
+      nothing: &nullVal null
+      flag: &boolVal true
+      """
+    And I create a file "children/bob.yaml" with content:
+      """
+      nothing: &nullVal null
+      flag: &boolVal false
+      """
+    And I provide input YAML:
+      """
+      nulls: !reference-all {pattern: "children/*.yaml", anchor: nullVal}
+      flags: !reference-all {pattern: "children/*.yaml", anchor: boolVal}
+      """
+    When I run yaml-reference-cli
+    Then the output shall be:
+      """
+      {
+        "nulls": [null, null],
+        "flags": [true, false]
+      }
+      """
