@@ -48,14 +48,23 @@ The `!reference` tag allows embedding content from other YAML files into the cur
 # Flow style
 key: !reference {path: other-file.yaml}
 
+# Flow style with anchor
+key: !reference {path: other-file.yaml, anchor: my_anchor}
+
 # Block style
 key: !reference
   path: other-file.yaml
+
+# Block style with anchor
+key: !reference
+  path: other-file.yaml
+  anchor: my_anchor
 ```
 
 ### Behavior:
 
 - Replaces the tag with the content of the referenced file
+- When `anchor` is specified, extracts only the value associated with that anchor from the referenced file instead of the whole document
 - Works with both scalar values and structured data
 - References can be nested (files can reference other files)
 - Supports both relative and absolute paths within the allowed scope
@@ -72,6 +81,7 @@ key: !reference
 - Returns error code `1` if referenced file doesn't exist
 - Returns error code `1` if a circular reference is detected
 - Returns error code `1` if path violates access restrictions
+- Returns error code `1` if `anchor` is specified but does not exist in the referenced file
 
 ## 3. `!reference-all` Tag Behavior
 
@@ -83,15 +93,24 @@ The `!reference-all` tag collects content from multiple files matching a glob pa
 # Flow style
 items: !reference-all {glob: data/*.yaml}
 
+# Flow style with anchor
+items: !reference-all {glob: data/*.yaml, anchor: my_anchor}
+
 # Block style
 items: !reference-all
   glob: data/*.yaml
+
+# Block style with anchor
+items: !reference-all
+  glob: data/*.yaml
+  anchor: my_anchor
 ```
 
 ### Behavior:
 
 - Collects all files matching the glob pattern
 - Returns an array containing the content of each matched file
+- When `anchor` is specified, extracts only the value associated with that anchor from each matched file instead of the whole document
 - If only one file matches, returns a single-element array
 - Files are processed in alphabetical order
 - Supports the same path restrictions as `!reference`
@@ -101,12 +120,19 @@ items: !reference-all
 - `!reference-all {glob: configs/*.yaml}` - collects all YAML files in `configs/` directory
 - `!reference-all {glob: data-*.yaml}` - collects all files matching pattern
 - `!reference-all {glob: topics/*/summary.yaml}` - collects all summary files in subdirectories of the `topics/` directory
+- `!reference-all {glob: services/*.yaml, anchor: config}` - collects the `config` anchor value from each matched file
 
 ### Path Restrictions:
 
 - Same as `!reference`: cannot reference files outside root directory
 - Glob patterns are evaluated relative to the file containing the tag
 - Symlinks pointing outside root directory are rejected
+
+### Error Conditions:
+
+- Returns error code `1` if no files match the glob pattern
+- Returns error code `1` if any matched file is the input file itself (cyclical reference)
+- Returns error code `1` if `anchor` is specified but does not exist in any matched file
 
 ## 4. `!flatten` Tag Behavior
 
