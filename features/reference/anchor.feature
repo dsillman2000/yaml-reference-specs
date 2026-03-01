@@ -220,6 +220,7 @@ Feature: !reference tag supports the "anchor" argument
     Then the output shall be:
       """
       {
+        "deep": 42,
         "whole": {
           "level1": {
             "level2": {
@@ -228,7 +229,6 @@ Feature: !reference tag supports the "anchor" argument
               }
             }
           }
-        },
-        "deep": 42
+        }
       }
       """

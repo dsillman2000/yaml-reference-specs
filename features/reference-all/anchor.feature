@@ -215,6 +215,9 @@ Feature: !reference-all tag supports the "anchor" argument
     Then the output shall be:
       """
       {
+        "deep": [
+          42
+        ],
         "whole": [
           {
             "level1": {
@@ -225,9 +228,6 @@ Feature: !reference-all tag supports the "anchor" argument
               }
             }
           }
-        ],
-        "deep": [
-          42
         ]
       }
       """
@@ -252,13 +252,13 @@ Feature: !reference-all tag supports the "anchor" argument
     Then the output shall be:
       """
       {
-        "nulls": [
-          null,
-          null
-        ],
         "flags": [
           true,
           false
+        ],
+        "nulls": [
+          null,
+          null
         ]
       }
       """
