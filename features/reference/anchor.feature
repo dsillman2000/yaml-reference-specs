@@ -194,7 +194,11 @@ Feature: !reference tag supports the "anchor" argument
       {
         "a": {},
         "b": [],
-        "c": [1, 2, 3]
+        "c": [
+          1,
+          2,
+          3
+        ]
       }
       """
 
