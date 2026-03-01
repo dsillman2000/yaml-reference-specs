@@ -126,6 +126,83 @@ Feature: !reference-all tag basically functions
       }
       """
 
+  Scenario: Files matched by !reference-all are ordered alphabetically by filename
+    Given I create a file "child/z.yaml" with content:
+      """
+      val: Zulu
+      """
+    And I create a file "child/a.yaml" with content:
+      """
+      val: Alpha
+      """
+    And I create a file "child/m.yaml" with content:
+      """
+      val: Mike
+      """
+    And I provide input YAML:
+      """
+      results: !reference-all {glob: "child/*.yaml"}
+      """
+    And I run yaml-reference-cli
+    Then the output shall be:
+      """
+      {
+        "results": [
+          {
+            "val": "Alpha"
+          },
+          {
+            "val": "Mike"
+          },
+          {
+            "val": "Zulu"
+          }
+        ]
+      }
+      """
+
+  Scenario: Multi-level glob matches in !reference-all are sorted alphabetically by path in JSON output
+    Given I create a file "child/aa/r/dvark.yaml" with content:
+      """
+      id: dvark
+      """
+    And I create a file "child/apps/z.yaml" with content:
+      """
+      id: zulu
+      """
+    And I create a file "child/libs/a.yaml" with content:
+      """
+      id: alpha
+      """
+    And I create a file "child/libs/m.yaml" with content:
+      """
+      id: mike
+      """
+    And I provide input YAML:
+      """
+      items: !reference-all {glob: "child/**/*.yaml"}
+      """
+    And I run yaml-reference-cli
+    Then the output shall be:
+      """
+      {
+        "items": [
+          {
+            "id": "dvark"
+          },
+          {
+            "id": "zulu"
+          },
+          {
+            "id": "alpha"
+          },
+          {
+            "id": "mike"
+          }
+        ]
+      }
+      """
+
   Scenario: An anchored mapping with a glob pattern can be aliased as an argument to a !reference-all tag.
     Given I create a file "api/models/crm/account.yaml" with content:
       """
