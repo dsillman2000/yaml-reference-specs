@@ -179,3 +179,21 @@ Feature: Paths may be explicitly allowed, otherwise restrictive default access c
     And I explicitly allow the path "headers" to be resolved
     And I run yaml-reference-cli
     Then the return code shall be 1
+
+  Scenario: Path prefix collision shall not grant access to unauthorized directories in !reference-all
+    Given I create a file "example/public.yml" with content:
+      """
+      data: public
+      """
+    And I create a file "examplesecrets/private.yml" with content:
+      """
+      data: secret
+      """
+    And the input YAML is in a directory "root"
+    And I provide input YAML:
+      """
+      items: !reference-all {glob: "../examplesecrets/*.yml"}
+      """
+    And I explicitly allow the path "example/" to be resolved
+    And I run yaml-reference-cli
+    Then the return code shall be 1

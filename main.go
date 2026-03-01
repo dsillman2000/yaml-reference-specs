@@ -131,7 +131,9 @@ func iCreateSymlink(ctx context.Context, symlinkPath, targetPath string) error {
 		return fmt.Errorf("failed to create directories for %s: %w", symlinkPath, err)
 	}
 	// Create symlink
-	if err := os.Symlink(targetPath, fullSymlinkPath); err != nil {
+	symlinkDir := filepath.Dir(fullSymlinkPath)
+	resolvedTarget, _ := filepath.Rel(symlinkDir, filepath.Join(testCtx.tempDir, targetPath))
+	if err := os.Symlink(resolvedTarget, fullSymlinkPath); err != nil {
 		return fmt.Errorf("failed to create symlink %s -> %s: %w", symlinkPath, targetPath, err)
 	}
 	return nil

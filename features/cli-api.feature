@@ -42,6 +42,14 @@ Feature: yaml-reference-cli does not modify target files not containing any !ref
       }
       """
 
+  Scenario: Malformed YAML input shall raise an error
+    Given I provide input YAML:
+      """
+      { invalid: [ json: mapping }
+      """
+    And I run yaml-reference-cli
+    Then the return code shall be 1
+
   Scenario: Keys are sorted by the CLI in the JSON result
     Given I provide input YAML:
       """

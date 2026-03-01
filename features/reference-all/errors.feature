@@ -11,7 +11,7 @@ Feature: Trying to parse !reference-all tags should sometimes throw errors.
   Scenario: Compiling a file with !reference-all which globs itself shall raise an error.
     Given I provide input YAML:
       """
-      items: !reference-all {glob: "*.yml"}
+      items: !reference-all {glob: "*.yaml"}
       """
     And I create a file "other.yaml" with content:
       """
