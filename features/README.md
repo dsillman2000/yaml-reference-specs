@@ -112,7 +112,7 @@ items: !reference-all
 - Returns an array containing the content of each matched file
 - When `anchor` is specified, extracts only the value associated with that anchor from each matched file instead of the whole document
 - If only one file matches, returns a single-element array
-- Files are processed in alphabetical order
+- Files are processed in alphabetical order by their full relative path
 - Supports the same path restrictions as `!reference`
 
 ### Examples:
