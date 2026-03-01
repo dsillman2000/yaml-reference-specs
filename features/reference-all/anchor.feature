@@ -144,17 +144,23 @@ Feature: !reference-all tag supports the "anchor" argument
       """
     And I provide input YAML:
       """
-      a: !reference-all {pattern: "children/scalars.yaml", anchor: nullVal}
-      b: !reference-all {pattern: "children/scalars.yaml", anchor: boolVal}
-      c: !reference-all {pattern: "children/scalars.yaml", anchor: emptyStr}
+      a: !reference-all {glob: "children/scalars.yaml", anchor: nullVal}
+      b: !reference-all {glob: "children/scalars.yaml", anchor: boolVal}
+      c: !reference-all {glob: "children/scalars.yaml", anchor: emptyStr}
       """
     When I run yaml-reference-cli
     Then the output shall be:
       """
       {
-        "a": [null],
-        "b": [true],
-        "c": [""]
+        "a": [
+          null
+        ],
+        "b": [
+          true
+        ],
+        "c": [
+          ""
+        ]
       }
       """
 
@@ -167,17 +173,27 @@ Feature: !reference-all tag supports the "anchor" argument
       """
     And I provide input YAML:
       """
-      a: !reference-all {pattern: "children/containers.yaml", anchor: eMap}
-      b: !reference-all {pattern: "children/containers.yaml", anchor: eSeq}
-      c: !reference-all {pattern: "children/containers.yaml", anchor: list}
+      a: !reference-all {glob: "children/containers.yaml", anchor: eMap}
+      b: !reference-all {glob: "children/containers.yaml", anchor: eSeq}
+      c: !reference-all {glob: "children/containers.yaml", anchor: list}
       """
     When I run yaml-reference-cli
     Then the output shall be:
       """
       {
-        "a": [{}],
-        "b": [[]],
-        "c": [[1, 2, 3]]
+        "a": [
+          {}
+        ],
+        "b": [
+          []
+        ],
+        "c": [
+          [
+            1,
+            2,
+            3
+          ]
+        ]
       }
       """
 
@@ -192,8 +208,8 @@ Feature: !reference-all tag supports the "anchor" argument
       """
     And I provide input YAML:
       """
-      whole: !reference-all {pattern: "children/depth.yaml", anchor: root}
-      deep: !reference-all {pattern: "children/depth.yaml", anchor: deep}
+      whole: !reference-all {glob: "children/depth.yaml", anchor: root}
+      deep: !reference-all {glob: "children/depth.yaml", anchor: deep}
       """
     When I run yaml-reference-cli
     Then the output shall be:
@@ -210,7 +226,9 @@ Feature: !reference-all tag supports the "anchor" argument
             }
           }
         ],
-        "deep": [42]
+        "deep": [
+          42
+        ]
       }
       """
 
@@ -227,14 +245,20 @@ Feature: !reference-all tag supports the "anchor" argument
       """
     And I provide input YAML:
       """
-      nulls: !reference-all {pattern: "children/*.yaml", anchor: nullVal}
-      flags: !reference-all {pattern: "children/*.yaml", anchor: boolVal}
+      nulls: !reference-all {glob: "children/*.yaml", anchor: nullVal}
+      flags: !reference-all {glob: "children/*.yaml", anchor: boolVal}
       """
     When I run yaml-reference-cli
     Then the output shall be:
       """
       {
-        "nulls": [null, null],
-        "flags": [true, false]
+        "nulls": [
+          null,
+          null
+        ],
+        "flags": [
+          true,
+          false
+        ]
       }
       """
