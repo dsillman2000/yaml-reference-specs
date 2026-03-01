@@ -192,7 +192,7 @@ Feature: Paths may be explicitly allowed, otherwise restrictive default access c
     And the input YAML is in a directory "root"
     And I provide input YAML:
       """
-      items: !reference-all {glob: "**/*.yml"}
+      items: !reference-all {glob: "../examplesecrets/*.yml"}
       """
     And I explicitly allow the path "example/" to be resolved
     And I run yaml-reference-cli
