@@ -262,3 +262,19 @@ Feature: !reference-all tag supports the "anchor" argument
         ]
       }
       """
+
+  Scenario: An anchor missing from some matched files in !reference-all shall raise an error
+    Given I create a file "a.yml" with content:
+      """
+      target: &my-anchor Value A
+      """
+    And I create a file "b.yml" with content:
+      """
+      other: Value B
+      """
+    And I provide input YAML:
+      """
+      results: !reference-all {glob: "*.yml", anchor: my-anchor}
+      """
+    And I run yaml-reference-cli
+    Then the return code shall be 1
