@@ -203,6 +203,42 @@ Feature: !reference-all tag basically functions
       }
       """
 
+  Scenario: Compiling a file with !reference-all when no files match the glob shall produce an empty array.
+    Given I provide input YAML:
+      """
+      items: !reference-all {glob: nonexistent-*.yml}
+      """
+    And I run yaml-reference-cli
+    Then the return code shall be 0
+    And the output shall be:
+      """
+      {
+        "items": []
+      }
+      """
+
+  Scenario: Compiling a file with !reference-all which globs itself shall omit the input file and include other matched files.
+    Given I provide input YAML:
+      """
+      items: !reference-all {glob: "*.yaml"}
+      """
+    And I create a file "other.yaml" with content:
+      """
+      hello: WORLD
+      """
+    And I run yaml-reference-cli
+    Then the return code shall be 0
+    And the output shall be:
+      """
+      {
+        "items": [
+          {
+            "hello": "WORLD"
+          }
+        ]
+      }
+      """
+
   Scenario: An anchored mapping with a glob pattern can be aliased as an argument to a !reference-all tag.
     Given I create a file "api/models/crm/account.yaml" with content:
       """
