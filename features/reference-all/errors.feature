@@ -15,7 +15,7 @@ Feature: !reference-all circular reference detection
   Scenario: Compiling a !reference-all tag to a file which references it shall raise an error.
     Given I provide input YAML:
       """
-      items: !reference-all {glob: "item/*.yml"}
+      items: !reference-all {glob: "item/*.yaml"}
       """
     And I create a file "item/a.yaml" with content:
       """
