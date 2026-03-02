@@ -1,19 +1,13 @@
 Feature: Paths may be explicitly allowed, otherwise restrictive default access control is applied on all references.
 
-  Scenario: Absolute paths in !reference-all tags are disallowed and produce an empty array.
+  Scenario: You cannot specify absolute paths in !reference-all tags.
     Given I provide input YAML:
       """
       malicious: !reference-all {glob: /home/*/pwd-cfg.yaml}
       """
     And I run yaml-reference-cli
     # Not ideal:
-    Then the return code shall be 0
-    And the output shall be:
-      """
-      {
-        "malicious": []
-      }
-      """
+    Then the return code shall be 1
 
   Scenario: Navigating out of the root directory in !reference-all omits disallowed files and produces an empty array.
     Given I provide input YAML:
