@@ -128,10 +128,17 @@ items: !reference-all
 - Glob patterns are evaluated relative to the file containing the tag
 - Symlinks pointing outside root directory are rejected
 
+### Glob Matching Behavior:
+
+- If the glob pattern uses an absolute path (e.g., `/home/user/*`), an error is raised (return code `1`).
+- If the glob pattern matches a disallowed file (e.g., outside the root directory via relative traversal or symlinks escaping the root), that file is silently omitted from the resulting array; no error is raised.
+- If the glob pattern matches no files at all (either because no files exist or all matched files are disallowed), the result is an empty array; no error is raised.
+
 ### Error Conditions:
 
-- Returns error code `1` if no files match the glob pattern
-- Returns error code `1` if any matched file is the input file itself (cyclical reference)
+- Returns error code `1` if the glob pattern itself uses an absolute path
+- Returns error code `1` if the glob pattern matches the input file itself (self-referential/cyclical reference)
+- Returns error code `1` if a circular reference is detected (a matched file references back to the input file)
 - Returns error code `1` if `anchor` is specified but does not exist in any matched file
 
 ## 4. `!flatten` Tag Behavior

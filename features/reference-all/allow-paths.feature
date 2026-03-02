@@ -9,7 +9,7 @@ Feature: Paths may be explicitly allowed, otherwise restrictive default access c
     # Not ideal:
     Then the return code shall be 1
 
-  Scenario: You cannot navigate out of the directory containing the root input YAML file.
+  Scenario: Navigating out of the root directory in !reference-all omits disallowed files and produces an empty array.
     Given I provide input YAML:
       """
       stolen: !reference-all {glob: ../secret/*.yaml}
@@ -20,7 +20,13 @@ Feature: Paths may be explicitly allowed, otherwise restrictive default access c
       secret: password123
       """
     And I run yaml-reference-cli
-    Then the return code shall be 1
+    Then the return code shall be 0
+    And the output shall be:
+      """
+      {
+        "stolen": []
+      }
+      """
 
   Scenario: You can navigate backwards from within a reference.
     Given I provide input YAML:
@@ -69,7 +75,7 @@ Feature: Paths may be explicitly allowed, otherwise restrictive default access c
       }
       """
 
-  Scenario: You cannot navigate out of the root directory from within a reference.
+  Scenario: Navigating out of the root directory from within a reference omits disallowed files.
     Given I provide input YAML:
       """
       ext: !reference {path: external.yaml}
@@ -84,7 +90,15 @@ Feature: Paths may be explicitly allowed, otherwise restrictive default access c
       secret: password123
       """
     And I run yaml-reference-cli
-    Then the return code shall be 1
+    Then the return code shall be 0
+    And the output shall be:
+      """
+      {
+        "ext": {
+          "secrets": []
+        }
+      }
+      """
 
   Scenario: You may explicitly allow paths outside of the root directory to be resolved from a reference-all tag.
     Given I provide input YAML:
@@ -136,7 +150,7 @@ Feature: Paths may be explicitly allowed, otherwise restrictive default access c
       }
       """
 
-  Scenario: You cannot navigate out of the root directory using a !reference-all tag with a symlink.
+  Scenario: Navigating out of the root directory via a symlink in !reference-all omits disallowed files and produces an empty array.
     Given I provide input YAML:
       """
       ext: !reference-all {glob: local-external/*.yaml}
@@ -152,9 +166,15 @@ Feature: Paths may be explicitly allowed, otherwise restrictive default access c
       """
     And I create a symlink "root/local-external" pointing to "external"
     And I run yaml-reference-cli
-    Then the return code shall be 1
+    Then the return code shall be 0
+    And the output shall be:
+      """
+      {
+        "ext": []
+      }
+      """
 
-  Scenario: You cannot navigate out of the root directory using a !reference-all tag to navigate through a symlink.
+  Scenario: Disallowed files navigated through symlinks in !reference-all are omitted; allowed files are included.
     Given I provide input YAML:
       """
       links: !reference-all {glob: symlinked/*/info.yaml}
@@ -178,9 +198,22 @@ Feature: Paths may be explicitly allowed, otherwise restrictive default access c
     And I explicitly allow the path "libs" to be resolved
     And I explicitly allow the path "headers" to be resolved
     And I run yaml-reference-cli
-    Then the return code shall be 1
+    Then the return code shall be 0
+    And the output shall be:
+      """
+      {
+        "links": [
+          {
+            "header.info": "1.0.0"
+          },
+          {
+            "lib.info": "0.1.0"
+          }
+        ]
+      }
+      """
 
-  Scenario: Path prefix collision shall not grant access to unauthorized directories in !reference-all
+  Scenario: Path prefix collision shall not grant access to unauthorized directories in !reference-all; disallowed files are omitted.
     Given I create a file "example/public.yml" with content:
       """
       data: public
@@ -196,4 +229,10 @@ Feature: Paths may be explicitly allowed, otherwise restrictive default access c
       """
     And I explicitly allow the path "example/" to be resolved
     And I run yaml-reference-cli
-    Then the return code shall be 1
+    Then the return code shall be 0
+    And the output shall be:
+      """
+      {
+        "items": []
+      }
+      """
