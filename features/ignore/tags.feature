@@ -29,7 +29,7 @@ Feature: !ignore tag interacts cleanly with other dynamic tags.
       """
     And I provide input YAML:
       """
-      items: !reference-all {glob: secrets/*.yaml}
+      items: !reference-all {glob: "secrets/*.yaml"}
       """
     And I explicitly allow the path "secrets/" to be resolved
     And I run yaml-reference-cli
