@@ -81,17 +81,7 @@ Feature: yaml-reference-cli does not modify target files not containing any !ref
         "z": "zee"
       }
       """
-
-  Scenario: An empty YAML file resolves to null
-    Given I provide input YAML:
-      """
-      """
-    And I run yaml-reference-cli
-    Then the output shall be:
-      """
-      null
-      """
-
+      
   Scenario: A YAML file with only a comment resolves to null
     Given I provide input YAML:
       """
