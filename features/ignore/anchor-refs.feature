@@ -1,4 +1,4 @@
-Feature: !ignore nodes yield null when specifically aliased or referenced else where, like empty files.
+Feature: !ignore nodes yield null when specifically aliased or referenced elsewhere, like empty files.
 
   Scenario: An alias to an !ignore anchor is omitted from the output.
     Given I provide input YAML:
