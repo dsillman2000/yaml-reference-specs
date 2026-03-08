@@ -232,3 +232,67 @@ Feature: !reference tag supports the "anchor" argument
         }
       }
       """
+
+  Scenario: Anchor defined within an !ignore node can be referenced directly
+    Given I create a file "config.yaml" with content:
+      """
+      hidden: !ignore
+        secret: &api_key secret_value_123
+      public: visible
+      """
+    And I provide input YAML:
+      """
+      api: !reference {path: config.yaml, anchor: api_key}
+      """
+    And I explicitly allow the path "config.yaml" to be resolved
+    When I run yaml-reference-cli
+    Then the output shall be:
+      """
+      {
+        "api": "secret_value_123"
+      }
+      """
+
+  Scenario: Anchor defined within deeply nested !ignore node can be referenced
+    Given I create a file "secrets.yaml" with content:
+      """
+      vault: !ignore
+        level1:
+          level2:
+            credentials: &password super_secret_pass
+      """
+    And I provide input YAML:
+      """
+      access: !reference {path: secrets.yaml, anchor: password}
+      """
+    And I explicitly allow the path "secrets.yaml" to be resolved
+    When I run yaml-reference-cli
+    Then the output shall be:
+      """
+      {
+        "access": "super_secret_pass"
+      }
+      """
+
+  Scenario: Multiple anchors within !ignore nodes can be referenced independently
+    Given I create a file "data.yaml" with content:
+      """
+      internal: !ignore
+        database:
+          host: &db_host localhost
+          port: &db_port 5432
+      """
+    And I provide input YAML:
+      """
+      hostname: !reference {path: data.yaml, anchor: db_host}
+      portnumber: !reference {path: data.yaml, anchor: db_port}
+      """
+    And I explicitly allow the path "data.yaml" to be resolved
+    When I run yaml-reference-cli
+    Then the output shall be:
+      """
+      {
+        "hostname": "localhost",
+        "portnumber": 5432
+      }
+      """

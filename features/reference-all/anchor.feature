@@ -278,3 +278,76 @@ Feature: !reference-all tag supports the "anchor" argument
       """
     And I run yaml-reference-cli
     Then the return code shall be 1
+
+  Scenario: Anchor defined within !ignore node can be referenced via !reference-all
+    Given I create a file "configs/app1.yaml" with content:
+      """
+      internal: !ignore
+        database: &db_config
+          host: db1.example.com
+          port: 5432
+      """
+    And I create a file "configs/app2.yaml" with content:
+      """
+      internal: !ignore
+        database: &db_config
+          host: db2.example.com
+          port: 5433
+      """
+    And I provide input YAML:
+      """
+      databases: !reference-all {glob: "configs/*.yaml", anchor: db_config}
+      """
+    And I explicitly allow the path "configs/" to be resolved
+    When I run yaml-reference-cli
+    Then the output shall be:
+      """
+      {
+        "databases": [
+          {
+            "host": "db1.example.com",
+            "port": 5432
+          },
+          {
+            "host": "db2.example.com",
+            "port": 5433
+          }
+        ]
+      }
+      """
+
+  Scenario: Multiple anchors within !ignore nodes can be extracted via !reference-all
+    Given I create a file "secrets/user1.yaml" with content:
+      """
+      vault: !ignore
+        credentials:
+          username: &user alice
+          password: &pass secret123
+      """
+    And I create a file "secrets/user2.yaml" with content:
+      """
+      vault: !ignore
+        credentials:
+          username: &user bob
+          password: &pass secret456
+      """
+    And I provide input YAML:
+      """
+      users: !reference-all {glob: "secrets/*.yaml", anchor: user}
+      passwords: !reference-all {glob: "secrets/*.yaml", anchor: pass}
+      """
+    And I explicitly allow the path "secrets/" to be resolved
+    When I run yaml-reference-cli
+    Then the output shall be:
+      """
+      {
+        "passwords": [
+          "secret123",
+          "secret456"
+        ],
+        "users": [
+          "alice",
+          "bob"
+        ]
+      }
+      """
