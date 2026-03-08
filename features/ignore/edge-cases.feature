@@ -1,6 +1,6 @@
 Feature: !ignore tag edge cases behave seamlessly like empty files.
 
-  Scenario: A document whose root is !ignore evaluates to null.
+  Scenario: A document whose root is !ignore is empty.
     Given I provide input YAML:
       """
       !ignore

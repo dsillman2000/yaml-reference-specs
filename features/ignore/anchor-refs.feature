@@ -1,6 +1,6 @@
 Feature: !ignore nodes yield null when specifically aliased or referenced else where, like empty files.
 
-  Scenario: An alias to an !ignore anchor evaluates to null.
+  Scenario: An alias to an !ignore anchor is omitted from the output.
     Given I provide input YAML:
       """
       definitions:
@@ -11,12 +11,11 @@ Feature: !ignore nodes yield null when specifically aliased or referenced else w
     Then the output shall be:
       """
       {
-        "definitions": [],
-        "public_data": null
+        "definitions": []
       }
       """
 
-  Scenario: A map value alias to an !ignore object evaluates to null.
+  Scenario: A map value alias to an !ignore object is omitted from the output.
     Given I provide input YAML:
       """
       anchors:
@@ -28,8 +27,7 @@ Feature: !ignore nodes yield null when specifically aliased or referenced else w
     Then the output shall be:
       """
       {
-        "anchors": [],
-        "b": null
+        "anchors": []
       }
       """
 
