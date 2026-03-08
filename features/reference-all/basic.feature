@@ -203,6 +203,35 @@ Feature: !reference-all tag basically functions
       }
       """
 
+  Scenario: Shorthand string scalar is equivalent to providing a glob argument
+
+    Given I provide input YAML:
+      """
+      allData: !reference-all "data-*.yml"
+      """
+    And I create a file "data-1.yml" with content:
+      """
+      key: value1
+      """
+    And I create a file "data-2.yml" with content:
+      """
+      key: value2
+      """
+    And I run yaml-reference-cli
+    Then the output shall be:
+      """
+      {
+        "allData": [
+          {
+            "key": "value1"
+          },
+          {
+            "key": "value2"
+          }
+        ]
+      }
+      """
+
   Scenario: Compiling a file with !reference-all when no files match the glob shall produce an empty array.
     Given I provide input YAML:
       """

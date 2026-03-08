@@ -12,9 +12,11 @@ Some of the projects which conform to this specification include:
 Tags supported include:
 
 - **`!reference`**: "Import" another YAML document from another file into the current node.
+  - Shorthand: `!reference "path/to/file.yaml"` (string scalar used as `path`)
   - `path`: Relative path to the YAML file to "import."
   - `anchor` *(optional)*: Name of an anchor defined in the target file to extract instead of the whole document. Raises an error if the anchor does not exist.
 - **`!reference-all`**: "Import" all YAML documents using a specific glob pattern into a sequence node.
+  - Shorthand: `!reference-all "glob/pattern/*.yaml"` (string scalar used as `glob`)
   - `glob`: Relative glob pattern matching YAML files to "import."
   - `anchor` *(optional)*: Name of an anchor defined in each matched file to extract instead of the whole document. Raises an error if the anchor does not exist in any matched file.
 - **`!merge`**: Merge a multiple objects into a single object, using a shallow merge.

@@ -45,6 +45,9 @@ The `!reference` tag allows embedding content from other YAML files into the cur
 ### Syntax:
 
 ```yaml
+# Shorthand (string scalar used as path; anchor not supported in shorthand)
+key: !reference "other-file.yaml"
+
 # Flow style
 key: !reference {path: other-file.yaml}
 
@@ -90,6 +93,9 @@ The `!reference-all` tag collects content from multiple files matching a glob pa
 ### Syntax:
 
 ```yaml
+# Shorthand (string scalar used as glob; anchor not supported in shorthand)
+items: !reference-all "data/*.yaml"
+
 # Flow style
 items: !reference-all {glob: data/*.yaml}
 
