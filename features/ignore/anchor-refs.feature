@@ -31,7 +31,7 @@ Feature: !ignore nodes yield null when specifically aliased or referenced elsewh
       }
       """
 
-  Scenario: Anchors defined inside an !ignored node can still be referenced elsewhere.
+  Scenario: Anchors defined inside an !ignore node can still be referenced elsewhere.
     Given I provide input YAML:
       """
       anchors: !ignore
