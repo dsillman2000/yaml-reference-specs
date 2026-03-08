@@ -1,13 +1,13 @@
 # YAML Reference Features Specification
 
-This directory contains Gherkin feature files that define the expected behavior of the `yaml-reference-cli` tool. The tool processes YAML files with special tags (`!reference`, `!reference-all`, `!merge`, `!flatten`) and outputs resolved JSON documents.
+This directory contains Gherkin feature files that define the expected behavior of the `yaml-reference-cli` tool. The tool processes YAML files with special tags (`!reference`, `!reference-all`, `!merge`, `!flatten`, `!ignore`) and outputs resolved JSON documents.
 
 ## Overview
 
 The `yaml-reference-cli` is a command-line tool that:
 
 1. Takes a YAML file as input
-2. Resolves all `!reference`, `!reference-all`, `!merge`, and `!flatten` tags
+2. Resolves all `!reference`, `!reference-all`, `!merge`, `!flatten`, and `!ignore` tags
 3. Outputs the fully resolved JSON document to stdout
 
 ## 1. CLI Behavior
@@ -227,7 +227,79 @@ server: !merge
 # }
 ```
 
-## 6. Protection Against Cyclical References
+## 6. `!ignore` Tag Behavior
+
+The `!ignore` tag suppresses a node from the output while preserving any anchors defined within it, enabling patterns like shared definition blocks that should not appear in the final document. See the specs in the [ignore](./ignore/) directory.
+
+### Syntax:
+
+```yaml
+# Ignore a map key's value (omits the key entirely)
+hidden_key: !ignore some_value
+
+# Ignore a list item
+items:
+  - normal_item
+  - !ignore hidden_item
+
+# Ignore a nested structure (entire subtree is pruned)
+definitions: !ignore
+  a: 1
+  b: 2
+
+# Ignore the root of a document
+!ignore
+root_key: value
+```
+
+### Behavior:
+
+- **Map keys**: A map key whose value is tagged `!ignore` is omitted entirely from the output object.
+- **List items**: A list item tagged `!ignore` is removed from the output array.
+- **Nested structures**: When a node is tagged `!ignore`, the entire subtree is pruned; its children are not evaluated for output.
+- **Nested ignores**: An `!ignore` nested inside another `!ignore` is supported without errors.
+- **Root `!ignore`**: If the document root is tagged `!ignore`, the output is `null` (equivalent to an empty document).
+- **All-ignored sequences**: A sequence where all items are `!ignore` results in `[]`.
+- **All-ignored maps**: A map where all values are `!ignore` results in `{}`.
+
+### Anchor & Alias Behavior:
+
+- **Anchors inside `!ignore` nodes**: Anchors defined within an `!ignore` node remain active and can be referenced elsewhere in the document via aliases or `!reference {anchor: ...}`. The node is removed from output, but its anchors are still registered.
+- **Aliases to `!ignore` anchors**: An alias (`*anchor`) that points to a node tagged `!ignore` is treated as if the `!ignore` were inlined at that position — the alias is omitted from the output just as the original tagged node would be.
+
+### Interaction with Other Tags:
+
+- **`!reference` to an `!ignore` file**: If the referenced file's root is `!ignore`, the referencing key is omitted entirely from the parent output object (not preserved with a null or empty value). For example, `data: !reference {path: ignored.yaml}` produces `{}` — the `data` key itself is absent.
+- **`!reference-all` with ignored files**: Files whose root is `!ignore` are silently omitted from the result array; they do not contribute a `null` entry.
+- **Direct `!reference {anchor: ...}` to an anchor inside an `!ignore` node**: Permitted. The anchor value is extracted and used normally, even though the containing node is suppressed from output.
+
+### Examples:
+
+```yaml
+# definitions.yaml — anchors are defined but the file root is !ignore
+!ignore
+defaults: &defaults
+  host: localhost
+  port: 3000
+
+# input.yaml
+server: !reference {path: definitions.yaml, anchor: defaults}
+# output: {"server": {"host": "localhost", "port": 3000}}
+```
+
+```yaml
+# Hiding implementation details with anchors
+anchors: !ignore
+  - &payload
+    user: alice
+    role: admin
+
+request:
+  body: *payload
+# output: {"request": {"body": {"role": "admin", "user": "alice"}}}
+```
+
+## 7. Protection Against Cyclical References
 
 The system includes robust protection against cyclical references to prevent infinite loops.
 
@@ -244,7 +316,7 @@ The system includes robust protection against cyclical references to prevent inf
 - Prevents infinite recursion during reference resolution
 - Error messages should indicate the cycle was detected
 
-## 7. Basic Reference Access Restriction with "allowed" Paths
+## 8. Basic Reference Access Restriction with "allowed" Paths
 
 While the default behavior restricts references to within the root directory, the system supports explicit path allowances for controlled external access.
 

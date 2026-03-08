@@ -19,10 +19,11 @@ Tags supported include:
   - `anchor` *(optional)*: Name of an anchor defined in each matched file to extract instead of the whole document. Raises an error if the anchor does not exist in any matched file.
 - **`!merge`**: Merge a multiple objects into a single object, using a shallow merge.
 - **`!flatten`**: "Flatten" a nested sequence of sequences into a one-dimensional sequence.
+- **`!ignore`**: Suppress a node from the output while preserving any anchors defined within it for use elsewhere in the document.
 
 ## Purpose
 
-> The CLI provides a language-agnostic framework for being able to assess the functionality of client libraries which implement the behavior of resolving YAML files which reference other YAML files (using `!reference`, `!reference-all`, `!merge` and `!flatten` syntax).
+> The CLI provides a language-agnostic framework for being able to assess the functionality of client libraries which implement the behavior of resolving YAML files which reference other YAML files (using `!reference`, `!reference-all`, `!merge`, `!flatten` and `!ignore` syntax).
 
 - Describe the expected behavior of `yaml-reference-cli` using human-readable feature files under `features/`.
 - Drive regression tests for the CLI implementation via Go tests that use the `godog` framework.
