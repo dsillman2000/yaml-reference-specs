@@ -100,6 +100,25 @@ Feature: !reference tag basically functions
       }
       """
 
+  Scenario: Shorthand string scalar is equivalent to providing a path argument (shorthand, scalar substitution)
+
+    Given I provide input YAML:
+      """
+      key1: !reference "data.yml"
+      """
+    And I create a file "data.yml" with content:
+      """
+      hello world
+      ...
+      """
+    And I run yaml-reference-cli
+    Then the output shall be:
+      """
+      {
+        "key1": "hello world"
+      }
+      """
+
   Scenario: A file references two other files
     Given I create a file "subdir/item1.yaml" with content:
       """
