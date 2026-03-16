@@ -282,3 +282,71 @@ Feature: !reference-all tag basically functions
         ]
       }
       """
+
+  Scenario: Compiling a file with !reference-all pointing to a single multi-document YAML file shall chain all documents into the result array.
+    Given I provide input YAML:
+      """
+      References: !reference-all {glob: "docs.yaml"}
+      """
+    And I create a file "docs.yaml" with content:
+      """
+      Hello: World
+      ---
+      Goodbye: World
+      ---
+      - Apple
+      - Orange
+      """
+    And I run yaml-reference-cli
+    Then the return code shall be 0
+    And the output shall be:
+      """
+      {
+        "References": [
+          {
+            "Hello": "World"
+          },
+          {
+            "Goodbye": "World"
+          },
+          [
+            "Apple",
+            "Orange"
+          ]
+        ]
+      }
+      """
+
+  Scenario: Compiling a file with !reference-all where a glob matches a mix of single- and multi-document YAML files shall chain all documents into the result array.
+    Given I provide input YAML:
+      """
+      items: !reference-all {glob: "data-*.yaml"}
+      """
+    And I create a file "data-single.yaml" with content:
+      """
+      key: single
+      """
+    And I create a file "data-multi.yaml" with content:
+      """
+      key: first
+      ---
+      key: second
+      """
+    And I run yaml-reference-cli
+    Then the return code shall be 0
+    And the output shall be:
+      """
+      {
+        "items": [
+          {
+            "key": "first"
+          },
+          {
+            "key": "second"
+          },
+          {
+            "key": "single"
+          }
+        ]
+      }
+      """

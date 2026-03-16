@@ -32,3 +32,17 @@ Feature: Trying to parse !reference tags should sometimes throw errors.
       """
     And I run yaml-reference-cli
     Then the return code shall be 1
+
+  Scenario: Compiling a file with !reference to a multi-document YAML file shall raise an error.
+    Given I provide input YAML:
+      """
+      item: !reference {path: multi.yaml}
+      """
+    And I create a file "multi.yaml" with content:
+      """
+      Hello: World
+      ---
+      Goodbye: World
+      """
+    And I run yaml-reference-cli
+    Then the return code shall be 1
