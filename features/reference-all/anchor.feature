@@ -351,3 +351,38 @@ Feature: !reference-all tag supports the "anchor" argument
         ]
       }
       """
+
+  Scenario: Using anchor argument with multi-document files extracts the anchored value from every document across all matched files
+    Given I create a file "data-1.yaml" with content:
+      """
+      name: &name Alice
+      age: 30
+      ---
+      name: &name Bob
+      age: 25
+      """
+    And I create a file "data-2.yaml" with content:
+      """
+      name: &name Charlie
+      age: 35
+      ---
+      name: &name Diana
+      age: 28
+      """
+    And I provide input YAML:
+      """
+      names: !reference-all {glob: "data-*.yaml", anchor: name}
+      """
+    When I run yaml-reference-cli
+    Then the return code shall be 0
+    And the output shall be:
+      """
+      {
+        "names": [
+          "Alice",
+          "Bob",
+          "Charlie",
+          "Diana"
+        ]
+      }
+      """
