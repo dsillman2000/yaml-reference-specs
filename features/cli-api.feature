@@ -92,3 +92,85 @@ Feature: yaml-reference-cli does not modify target files not containing any !ref
       """
       null
       """
+
+  Scenario: A multi-document root input file is compiled as an array of documents, with !ignored documents dropped.
+    Given I create a file "ref.yaml" with content:
+      """
+      ref-value: 42
+      """
+    And I create a file "subdocs.yaml" with content:
+      """
+      sub-doc-1: !reference ref.yaml
+      ---
+      duped:
+        - &data !reference ref.yaml
+        - *data
+      """
+    And I provide input YAML:
+      """
+      v: 1
+      data: !reference ref.yaml
+      sub-docs: !reference-all subdocs.yaml
+      ---
+      .anchors: !ignore
+        something: &something unused
+      ---
+      !ignore
+      Totally Ignored document! Nothing in here matters.
+      ---
+      flat: !flatten
+        - [1, 2, 3]
+        - 4
+      ---
+      merge: !merge
+        - a: 1
+          b: 2
+        - b: 3
+          c: 4
+      """
+    And I run yaml-reference-cli
+    Then the return code shall be 0
+    And the output shall be:
+      """
+      [
+        {
+          "data": {
+            "ref-value": 42
+          },
+          "sub-docs": [
+            {
+              "sub-doc-1": {
+                "ref-value": 42
+              }
+            },
+            {
+              "duped": [
+                {
+                  "ref-value": 42
+                },
+                {
+                  "ref-value": 42
+                }
+              ]
+            }
+          ],
+          "v": 1
+        },
+        {},
+        {
+          "flat": [
+            1,
+            2,
+            3,
+            4
+          ]
+        },
+        {
+          "merge": {
+            "a": 1,
+            "b": 3,
+            "c": 4
+          }
+        }
+      ]
+      """
