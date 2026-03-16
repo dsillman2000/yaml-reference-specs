@@ -390,7 +390,7 @@ Feature: !reference-all tag basically functions
             "Zoey"
           ],
           "Doc": "Name of my document",
-          "Version": "1.0"
+          "Version": 1.0
         }
       }
       """
