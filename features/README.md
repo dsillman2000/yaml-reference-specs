@@ -305,7 +305,93 @@ request:
 # output: {"request": {"body": {"role": "admin", "user": "alice"}}}
 ```
 
-## 7. Protection Against Cyclical References
+## 7. Multi-Document YAML Files
+
+YAML supports placing multiple documents in a single file, separated by the `---` document separator. The `yaml-reference-cli` has explicit, well-defined behavior for multi-document files.
+
+### Key Rule: `!reference` Cannot Target Multi-Document Files
+
+A file containing more than one YAML document **cannot** be targeted by a `!reference` tag. Attempting to do so is an error (return code `1`). Use `!reference-all` instead.
+
+### `!reference-all` and Multi-Document Files
+
+When a file matched by `!reference-all` contains multiple documents, **each document is treated as a separate element** and they are all chained into the result array in the order they appear in the file. This is the only supported way to reference multi-document files.
+
+For a glob that matches a mix of single- and multi-document files, files are sorted alphabetically by path. Single-document files contribute one element; multi-document files contribute N elements (one per document), all in document order within that file.
+
+#### Example:
+
+```yaml
+# docs.yaml
+Hello: World
+---
+Goodbye: World
+---
+- Apple
+- Orange
+```
+
+```yaml
+# input.yaml
+References: !reference-all {glob: "docs.yaml"}
+```
+
+Output:
+
+```json
+{
+  "References": [
+    {"Hello": "World"},
+    {"Goodbye": "World"},
+    ["Apple", "Orange"]
+  ]
+}
+```
+
+### `!ignore` in Multi-Document Files
+
+Documents whose root value is tagged `!ignore` are silently **excluded** from the `!reference-all` result array. They do not contribute a `null` or empty entry. This lets you embed header/footer comments or anchor-definition documents in a multi-document file without polluting the resolved output.
+
+```yaml
+# docs.yaml
+!ignore |-
+  Header — suppressed from output.
+---
+Doc: My Document
+Version: 1.0
+---
+!ignore |-
+  Footer — suppressed from output.
+```
+
+```yaml
+# input.yaml
+Content: !merge
+  - !reference-all docs.yaml
+# → {"Content": {"Doc": "My Document", "Version": "1.0"}}
+```
+
+### Multi-Document Root Input Files
+
+If the **root input file** passed to the CLI contains multiple documents, the CLI compiles it as an **array**, with each document becoming one element:
+
+- Documents tagged `!ignore` at the root are **dropped** entirely from the array.
+- Documents where only certain keys are `!ignore`d contribute a (possibly empty) object.
+- All other tags (`!reference`, `!reference-all`, `!flatten`, `!merge`) resolve normally within each document.
+
+```yaml
+# input.yaml
+first: document
+---
+second: document
+---
+!ignore
+This document is dropped.
+```
+
+Output: `[{"first": "document"}, {"second": "document"}]`
+
+## 8. Protection Against Cyclical References
 
 The system includes robust protection against cyclical references to prevent infinite loops.
 
@@ -322,7 +408,7 @@ The system includes robust protection against cyclical references to prevent inf
 - Prevents infinite recursion during reference resolution
 - Error messages should indicate the cycle was detected
 
-## 8. Basic Reference Access Restriction with "allowed" Paths
+## 9. Basic Reference Access Restriction with "allowed" Paths
 
 While the default behavior restricts references to within the root directory, the system supports explicit path allowances for controlled external access.
 

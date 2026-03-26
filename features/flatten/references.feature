@@ -44,3 +44,52 @@ Feature: !flatten tag shall support flattening the results of !reference and !re
         ]
       }
       """
+
+  Scenario: Flatten a !reference-all of a multi-document file chains and flattens all documents.
+    Given I create a file "entries.yaml" with content:
+      """
+      - this: is
+      - sentence: one
+      ---
+      - also: a
+      - sentence: two
+      ---
+      - - [ {word: 1} ]
+        - word: 2
+        - word: 3
+      """
+    And I provide input YAML:
+      """
+      flattened: !flatten
+        - !reference-all "entries.yaml"
+      """
+    When I run yaml-reference-cli
+    Then the return code shall be 0
+    And the output shall be:
+      """
+      {
+        "flattened": [
+          {
+            "this": "is"
+          },
+          {
+            "sentence": "one"
+          },
+          {
+            "also": "a"
+          },
+          {
+            "sentence": "two"
+          },
+          {
+            "word": 1
+          },
+          {
+            "word": 2
+          },
+          {
+            "word": 3
+          }
+        ]
+      }
+      """

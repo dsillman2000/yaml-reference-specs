@@ -106,3 +106,34 @@ Feature: !merge tag shall support merging objects from !reference and !reference
         }
       }
       """
+
+  Scenario: Merge a !reference-all of a multi-document file uses last-write-wins across all documents.
+    Given I create a file "patches.yaml" with content:
+      """
+      a: 1
+      ---
+      b: 2
+      ---
+      c: 3
+      ---
+      a: 4
+      ---
+      c: 5
+      """
+    And I provide input YAML:
+      """
+      merged: !merge
+        - !reference-all "patches.yaml"
+      """
+    When I run yaml-reference-cli
+    Then the return code shall be 0
+    And the output shall be:
+      """
+      {
+        "merged": {
+          "a": 4,
+          "b": 2,
+          "c": 5
+        }
+      }
+      """

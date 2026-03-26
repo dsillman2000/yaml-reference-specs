@@ -282,3 +282,115 @@ Feature: !reference-all tag basically functions
         ]
       }
       """
+
+  Scenario: Compiling a file with !reference-all pointing to a single multi-document YAML file shall chain all documents into the result array.
+    Given I provide input YAML:
+      """
+      References: !reference-all {glob: "docs.yaml"}
+      """
+    And I create a file "docs.yaml" with content:
+      """
+      Hello: World
+      ---
+      Goodbye: World
+      ---
+      - Apple
+      - Orange
+      """
+    And I run yaml-reference-cli
+    Then the return code shall be 0
+    And the output shall be:
+      """
+      {
+        "References": [
+          {
+            "Hello": "World"
+          },
+          {
+            "Goodbye": "World"
+          },
+          [
+            "Apple",
+            "Orange"
+          ]
+        ]
+      }
+      """
+
+  Scenario: Compiling a file with !reference-all where a glob matches a mix of single- and multi-document YAML files shall chain all documents into the result array.
+    Given I provide input YAML:
+      """
+      items: !reference-all {glob: "data-*.yaml"}
+      """
+    And I create a file "data-single.yaml" with content:
+      """
+      key: single
+      """
+    And I create a file "data-multi.yaml" with content:
+      """
+      key: first
+      ---
+      key: second
+      """
+    And I run yaml-reference-cli
+    Then the return code shall be 0
+    And the output shall be:
+      """
+      {
+        "items": [
+          {
+            "key": "first"
+          },
+          {
+            "key": "second"
+          },
+          {
+            "key": "single"
+          }
+        ]
+      }
+      """
+
+  Scenario: Compiling a file with !reference-all where the target multi-document file contains !ignored documents shall exclude those documents from the result.
+    Given I provide input YAML:
+      """
+      Content: !merge
+        - !reference-all docs.yaml
+      """
+    And I create a file "docs.yaml" with content:
+      """
+      !ignore |-
+      This is my header for the document.
+      It will be suppressed from the result of the !reference-all tag.
+      ---
+      Doc: Name of my document
+      Version: 1.0
+      Authors:
+       - Ralph
+       - Philip
+       - Victoria
+       - Zoey
+      ---
+      !ignore |-
+      This is my footer for the document.
+      It will be suppressed from the result of the !reference-all tag.
+
+      Last edited: 2026-03-16
+      """
+    And I run yaml-reference-cli
+    Then the return code shall be 0
+    And the output shall be:
+      """
+      {
+        "Content": {
+          "Authors": [
+            "Ralph",
+            "Philip",
+            "Victoria",
+            "Zoey"
+          ],
+          "Doc": "Name of my document",
+          "Version": 1.0
+        }
+      }
+      """
