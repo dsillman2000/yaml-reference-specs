@@ -6,6 +6,8 @@ This is a **Gherkin specification suite** for the `yaml-reference-cli` tool usin
 
 The project **does not contain the CLI itself**—it's a test harness that validates that different language implementations (Python, TypeScript, etc.) conform to the specification.
 
+**For a quick reference, see [AGENTS.md](../AGENTS.md).**
+
 ## Build & Test Commands
 
 ### Installation
@@ -37,9 +39,47 @@ go run . -format junit        # JUnit XML for CI/CD
 go run . -format json         # JSON output
 ```
 
-## Architecture
+## Key YAML Tags & Behaviors
 
-### Core Components
+Before diving into architecture, understand what the spec tests:
+
+| Tag | Behavior | Notes |
+|-----|----------|-------|
+| `!reference` | Import file content; supports `path` + optional `anchor` | Cannot target multi-doc YAML files; anchor resolves locally only |
+| `!reference-all` | Import files matching glob pattern into array | Returns empty array if no matches; supports multi-doc YAML |
+| `!merge` | Shallow merge objects, last-write-wins semantics | Not YAML 1.1 first-write-wins; flattens nested sequences before merging |
+| `!flatten` | Recursively flatten nested arrays to single level | Applied only to tagged node, not entire document |
+| `!ignore` | Suppress node from output, preserve internal anchors | Allows embedding anchors without outputting the container |
+
+## Path Restrictions (Security Model)
+
+All file references are restricted **relative to the input file's root directory**:
+
+- ✅ **Allowed:** References within same directory or subdirectories (`subdir/file.yaml`)
+- ❌ **Blocked:** Upward traversal (`../../../etc/passwd`)
+- ❌ **Blocked:** Absolute paths (`/etc/passwd`) — unless explicitly allowed via `--allow` flag
+- ❌ **Blocked:** Symlinks that escape outside root directory
+
+**Important:** Glob patterns matching disallowed paths silently omit those files (no error thrown).
+
+## CLI Requirements
+
+- **Exit Codes:** `0` on success, `1` on any error
+- **JSON Output:** Keys must be sorted alphabetically at all nesting levels
+- **Environment Variable:** `YAML_REFERENCE_CLI_EXECUTABLE` must be set and point to valid binary
+  - Tests panic if missing
+  - Tests panic if file doesn't exist
+
+## Important Implementation Notes
+
+- Anchors and aliases resolve only **within the file they're defined in** (not cross-file)
+- Feature files are **embedded in the binary** via `//go:embed` — no external reads during tests
+- **Multi-document YAML:**
+  - `!reference` cannot target multi-doc files (error condition)
+  - `!reference-all` can target multi-doc files (chains documents into result array)
+- **Glob patterns:** Files matching disallowed paths are silently omitted (not an error)
+
+## Architecture
 
 **Scenario Test Framework** (`main.go`)
 - Contains the `godog` scenario initialization and step definitions
@@ -120,3 +160,5 @@ The input file path is relative to the temp directory; allowed paths are absolut
 - Output from the CLI is compared as trimmed strings; formatting matters for assertions
 - Error handling: the CLI should return exit code 1 on any error, 0 on success
 - JSON output keys must be sorted alphabetically at all nesting levels (validated by assertions)
+- Anchors and aliases can only be resolved within the file they're defined (see Path Restrictions above)
+- For quick reference on project scope and requirements, see [AGENTS.md](../AGENTS.md)
