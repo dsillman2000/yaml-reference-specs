@@ -34,6 +34,7 @@ go run . -format json     # JSON output
 |-------------|---------|
 | **CLI Executable** | `YAML_REFERENCE_CLI_EXECUTABLE` env var (required; test panics if missing) |
 | **JSON Output** | Keys sorted alphabetically at all nesting levels |
+| **Numbers** | Compared by value: `1.0` and `1` are both accepted (see `normalizeJSONNumbers` in `main.go`) |
 | **Exit Codes** | `0` on success, `1` on any error |
 | **Test Isolation** | Each scenario runs in isolated temp directory (auto-cleaned after test) |
 

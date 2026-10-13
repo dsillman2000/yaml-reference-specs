@@ -66,6 +66,7 @@ All file references are restricted **relative to the input file's root directory
 
 - **Exit Codes:** `0` on success, `1` on any error
 - **JSON Output:** Keys must be sorted alphabetically at all nesting levels
+- **Numbers:** Output is compared exactly, except that number literals are compared by value (`1.0` matches `1`)
 - **Environment Variable:** `YAML_REFERENCE_CLI_EXECUTABLE` must be set and point to valid binary
   - Tests panic if missing
   - Tests panic if file doesn't exist
