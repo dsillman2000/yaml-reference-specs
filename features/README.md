@@ -30,6 +30,7 @@ The CLI reads a YAML file from disk, processes all special tags, and prints the 
   - `0` for successful compilation
   - `1` for errors (file not found, cyclical references, access violations, etc.)
 - **JSON Output**: Keys are sorted alphabetically at all nesting levels
+- **Numbers**: Numeric values are compared by value, so a float with no fractional part may be printed either as `1.0` or `1` (languages like JavaScript have no distinct float type)
 - **YAML Features**: Supports standard YAML features including anchors (`&anchor`) and aliases (`*anchor`)
 
 ### Examples:

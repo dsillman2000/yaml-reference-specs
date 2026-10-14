@@ -8,6 +8,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strconv"
 	"strings"
 
 	"github.com/cucumber/godog"
@@ -148,6 +149,50 @@ func iProvideInputYamlInDirectory(ctx context.Context, directory string) error {
 	return nil
 }
 
+// normalizeJSONNumbers rewrites every number literal outside of string
+// literals in a JSON document into a canonical form, so that numerically equal
+// values compare equal regardless of how an implementation formats them (e.g.
+// `1.0` vs `1`, which languages without a distinct float type cannot preserve).
+// All other text, including key order and indentation, is left untouched.
+func normalizeJSONNumbers(s string) string {
+	var b strings.Builder
+	inString := false
+	for i := 0; i < len(s); i++ {
+		c := s[i]
+		if inString {
+			b.WriteByte(c)
+			if c == '\\' && i+1 < len(s) {
+				i++
+				b.WriteByte(s[i])
+			} else if c == '"' {
+				inString = false
+			}
+			continue
+		}
+		if c == '"' {
+			inString = true
+			b.WriteByte(c)
+			continue
+		}
+		if c == '-' || (c >= '0' && c <= '9') {
+			j := i + 1
+			for j < len(s) && strings.IndexByte("0123456789.eE+-", s[j]) >= 0 {
+				j++
+			}
+			token := s[i:j]
+			if f, err := strconv.ParseFloat(token, 64); err == nil {
+				b.WriteString(strconv.FormatFloat(f, 'g', -1, 64))
+			} else {
+				b.WriteString(token)
+			}
+			i = j - 1
+			continue
+		}
+		b.WriteByte(c)
+	}
+	return b.String()
+}
+
 func theOutputShallBe(ctx context.Context, arg1 *godog.DocString) error {
 	testCtx := ctx.Value("testContext").(*testContext)
 	if testCtx == nil {
@@ -156,7 +201,7 @@ func theOutputShallBe(ctx context.Context, arg1 *godog.DocString) error {
 	expected := strings.TrimSpace(arg1.Content)
 	testCtx.yamlReferenceCliArgs.expectedOutput = expected
 	actual := strings.TrimSpace(testCtx.output)
-	if actual != expected {
+	if actual != expected && normalizeJSONNumbers(actual) != normalizeJSONNumbers(expected) {
 		return fmt.Errorf("Expected output to be:\n\n%s\n\nGot:\n\n%s\n", expected, actual)
 	}
 	return nil
